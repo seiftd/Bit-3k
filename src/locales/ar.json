@@ -1,0 +1,74 @@
+{
+  "common": {
+    "welcome": "مرحباً",
+    "back": "رجوع",
+    "continue": "متابعة",
+    "loading": "جار التحميل...",
+    "error": "خطأ",
+    "success": "نجح"
+  },
+  "game": {
+    "play": "العب",
+    "level": "المستوى",
+    "reward": "المكافأة",
+    "hint": "تلميح",
+    "skip": "تخطي",
+    "submit": "إرسال",
+    "correct": "صحيح!",
+    "incorrect": "خطأ! حاول مرة أخرى.",
+    "completed": "اكتمل المستوى!",
+    "earned": "لقد ربحت {amount} SBR!"
+  },
+  "profile": {
+    "title": "الملف الشخصي",
+    "balance": "رصيد SBR",
+    "currentLevel": "المستوى الحالي",
+    "levelsCompleted": "المستويات المكتملة",
+    "totalEarned": "إجمالي SBR المكتسب",
+    "referrals": "إحالاتك",
+    "adsWatched": "الإعلانات المشاهدة",
+    "referralCode": "كود الإحالة"
+  },
+  "referrals": {
+    "title": "دعوة الأصدقاء",
+    "shareLink": "شارك رابط الإحالة الخاص بك:",
+    "rewards": "المكافآت:",
+    "directReward": "+1 SBR لكل صديق يسجل",
+    "level1Bonus": "10% من أرباح الصديق اليومية",
+    "level2Bonus": "5% من أرباح أصدقاء الأصدقاء",
+    "yourReferrals": "إحالاتك الحالية"
+  },
+  "staking": {
+    "title": "نظام التخزين",
+    "yourBalance": "رصيدك الحالي",
+    "choosePackage": "اختر حزمة تخزين:",
+    "package7": "7 أيام (10% عائد)",
+    "package14": "14 يوم (25% عائد)",
+    "package30": "30 يوم (50% عائد)",
+    "stake": "تخزين",
+    "withdraw": "سحب"
+  },
+  "missions": {
+    "title": "المهام اليومية",
+    "complete": "أكمل المهام لربح SBR إضافي!",
+    "dailyLogin": "تسجيل دخول يومي",
+    "subscribeChannel": "الاشتراك بالقناة",
+    "watchAd": "شاهد إعلان",
+    "inviteFriend": "دعوة صديق"
+  },
+  "ad": {
+    "title": "وقت الإعلان!",
+    "description": "شاهد هذا الإعلان لفتح المستوى التالي",
+    "secondsRemaining": "ثانية متبقية...",
+    "completed": "اكتمل الإعلان!",
+    "pleaseWait": "يرجى الانتظار...",
+    "continue": "متابعة"
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "language": "اللغة",
+    "english": "الإنجليزية",
+    "arabic": "العربية"
+  }
+}
+

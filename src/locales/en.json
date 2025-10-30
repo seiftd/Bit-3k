@@ -1,0 +1,74 @@
+{
+  "common": {
+    "welcome": "Welcome",
+    "back": "Back",
+    "continue": "Continue",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success"
+  },
+  "game": {
+    "play": "Play",
+    "level": "Level",
+    "reward": "Reward",
+    "hint": "Hint",
+    "skip": "Skip",
+    "submit": "Submit",
+    "correct": "Correct!",
+    "incorrect": "Incorrect! Try again.",
+    "completed": "Level completed!",
+    "earned": "You earned {amount} SBR!"
+  },
+  "profile": {
+    "title": "Profile",
+    "balance": "SBR Balance",
+    "currentLevel": "Current Level",
+    "levelsCompleted": "Levels Completed",
+    "totalEarned": "Total SBR Earned",
+    "referrals": "Your Referrals",
+    "adsWatched": "Ads Watched",
+    "referralCode": "Referral Code"
+  },
+  "referrals": {
+    "title": "Invite Friends",
+    "shareLink": "Share your referral link:",
+    "rewards": "Rewards:",
+    "directReward": "+1 SBR per friend signup",
+    "level1Bonus": "10% of friend's daily earnings",
+    "level2Bonus": "5% of second-level referrals",
+    "yourReferrals": "Your current referrals"
+  },
+  "staking": {
+    "title": "Staking System",
+    "yourBalance": "Your current balance",
+    "choosePackage": "Choose a staking package:",
+    "package7": "7 Days (10% return)",
+    "package14": "14 Days (25% return)",
+    "package30": "30 Days (50% return)",
+    "stake": "Stake",
+    "withdraw": "Withdraw"
+  },
+  "missions": {
+    "title": "Daily Missions",
+    "complete": "Complete missions to earn extra SBR!",
+    "dailyLogin": "Daily Login",
+    "subscribeChannel": "Subscribe to Channel",
+    "watchAd": "Watch Ad",
+    "inviteFriend": "Invite Friend"
+  },
+  "ad": {
+    "title": "Ad Time!",
+    "description": "Watch this ad to unlock your next level",
+    "secondsRemaining": "seconds remaining...",
+    "completed": "Ad completed!",
+    "pleaseWait": "Please Wait...",
+    "continue": "Continue"
+  },
+  "settings": {
+    "title": "Settings",
+    "language": "Language",
+    "english": "English",
+    "arabic": "Arabic"
+  }
+}
+
