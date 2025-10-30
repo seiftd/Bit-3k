@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 // Monetization ad function (declare at top level)
@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-export default function AdPage() {
+function AdPageContent() {
   const searchParams = useSearchParams();
   const adToken = searchParams.get('token');
   const [timeLeft, setTimeLeft] = useState(15);
@@ -237,6 +237,21 @@ export default function AdPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function AdPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="text-4xl mb-4">⏳</div>
+          <p className="text-gray-600">Loading ad...</p>
+        </div>
+      </div>
+    }>
+      <AdPageContent />
+    </Suspense>
   );
 }
 
