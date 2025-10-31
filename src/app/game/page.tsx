@@ -22,7 +22,11 @@ declare global {
         isClosingConfirmationEnabled: boolean;
         BackButton: any;
         MainButton: any;
-        HapticFeedback: any;
+        HapticFeedback: {
+          impactOccurred: (style: string) => void;
+          notificationOccurred: (type: string) => void;
+          selectionChanged: () => void;
+        };
         ready: () => void;
         expand: () => void;
         close: () => void;
@@ -72,10 +76,6 @@ function GameContent() {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
-      
-      // Set theme colors
-      tg.setHeaderColor('#0ea5e9');
-      tg.setBackgroundColor('#ffffff');
       
       // Get user data
       const user = tg.initDataUnsafe?.user;
