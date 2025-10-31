@@ -18,6 +18,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Telegram WebApp SDK */}
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         {/* Monetization script - add your actual ad provider script here */}
         <Script src="/monetization.js" strategy="lazyOnload" />
       </head>
