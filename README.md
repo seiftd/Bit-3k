@@ -58,11 +58,25 @@ Update `public/monetization.js` with your actual monetization provider's code.
 
 ## 📱 Features
 
+### Standalone Game (No Backend Required!)
+- ✅ **25 Embedded Levels** - Diverse puzzles (Math, Riddles, Detective Cases)
+- ✅ **Game Engine** - Complete state management with localStorage
+- ✅ **Level Selection Menu** - Browse and select any unlocked level
+- ✅ **Stats Dashboard** - Track progress, SBR balance, and achievements
+- ✅ **Beautiful UI** - Modern gradient design with smooth animations
+
+### Telegram Integration
 - ✅ Ad webview with 15-second timer
 - ✅ JWT validation
 - ✅ Admin dashboard
 - ✅ Responsive design
 - ✅ Multilingual support (EN/AR)
+
+## 🎮 Game Modes
+
+1. **Standalone Mode** (`/play`) - Play 25 embedded levels without API
+2. **Level Browser** (`/levels`) - Select and replay any unlocked level
+3. **API Mode** (`/game`) - Connect to backend for full features
 
 ## 🛠️ Tech Stack
 
