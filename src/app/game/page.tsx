@@ -94,14 +94,11 @@ function GameContent() {
       const initData = tg?.initData;
       
       if (!initData) {
-        // Fallback for testing outside Telegram
-        const testToken = localStorage.getItem('test_token');
-        if (testToken) {
-          setToken(testToken);
-          await loadLevel(testToken);
-          return;
-        }
-        throw new Error('Not in Telegram WebApp. Please open from Telegram bot.');
+        // Allow testing without Telegram - skip authentication for now
+        // User can still see the UI
+        setLoading(false);
+        setError('Not in Telegram WebApp. Please open from Telegram bot.');
+        return;
       }
 
       // Parse user data
@@ -111,7 +108,9 @@ function GameContent() {
       }
 
       // Authenticate
-      const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/telegram`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+      
+      const authResponse = await fetch(`${apiUrl}/api/auth/telegram`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -124,7 +123,9 @@ function GameContent() {
       });
 
       if (!authResponse.ok) {
-        throw new Error('Authentication failed');
+        const errorText = await authResponse.text();
+        console.error('Auth error:', errorText);
+        throw new Error(`Authentication failed: ${authResponse.status} - ${errorText}`);
       }
 
       const authData = await authResponse.json();
@@ -140,19 +141,23 @@ function GameContent() {
 
   const loadLevel = async (authToken: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/levels/current`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+      
+      const response = await fetch(`${apiUrl}/api/levels/current`, {
         headers: { 'Authorization': `Bearer ${authToken}` },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to load level');
+        const errorText = await response.text();
+        console.error('Load level error:', errorText);
+        throw new Error(`Failed to load level: ${response.status} - ${errorText}`);
       }
 
       const levelData = await response.json();
       setLevel(levelData);
+      setLoading(false);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to load level');
-    } finally {
       setLoading(false);
     }
   };
