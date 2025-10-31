@@ -36,20 +36,28 @@ export default function Home() {
 
         <div className="mb-6">
           <p className="text-gray-600 mb-4 font-semibold">
-            📱 Play in Telegram - Click below to start!
+            📱 Play directly in your browser or Telegram Mini App!
           </p>
-          <a
-            href={`https://t.me/${botUsername}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg transition transform hover:scale-105 text-lg shadow-lg"
-          >
-            🚀 Open Bot in Telegram
-          </a>
+          <div className="space-y-3">
+            <a
+              href="/game"
+              className="inline-block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg transition transform hover:scale-105 text-lg shadow-lg text-center"
+            >
+              🎮 Play Game Now
+            </a>
+            <a
+              href={`https://t.me/${botUsername}?start=webapp`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 shadow-lg text-center"
+            >
+              📲 Open in Telegram Mini App
+            </a>
+          </div>
         </div>
 
         <p className="text-sm text-gray-400 mt-6">
-          The game runs inside Telegram. Click the button above to start playing!
+          The game works in both browser and Telegram Mini App format!
         </p>
       </div>
     </main>
