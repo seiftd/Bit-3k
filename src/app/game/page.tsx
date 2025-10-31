@@ -167,20 +167,32 @@ function GameContent() {
 
     setSubmitted(true);
     setLoading(true);
+    setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/levels/${level.level_number}/submit`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+      
+      const response = await fetch(`${apiUrl}/api/levels/${level.level_number}/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ answer: answer.trim() }),
+      }).catch((fetchError) => {
+        console.error('Fetch error:', fetchError);
+        throw new Error(`Network error: ${fetchError.message}. Please check if API is running at ${apiUrl}`);
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to submit answer');
+        const errorText = await response.text();
+        let errorData;
+        try {
+          errorData = JSON.parse(errorText);
+        } catch {
+          errorData = { detail: errorText };
+        }
+        throw new Error(errorData.detail || `Failed to submit answer: ${response.status}`);
       }
 
       const resultData = await response.json();
