@@ -40,18 +40,22 @@ export default function Home() {
           </p>
           <div className="space-y-3">
             <a
-              href="/game"
-              className="inline-block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-4 px-8 rounded-lg transition transform hover:scale-105 text-lg shadow-lg text-center"
+              href="/play"
+              className="inline-block w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl transition transform hover:scale-105 text-lg shadow-lg text-center"
             >
-              🎮 Play Game Now
+              🎮 Play Game Now (Standalone)
             </a>
             <a
-              href={`https://t.me/${botUsername}?start=webapp`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-block w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 shadow-lg text-center"
+              href="/levels"
+              className="inline-block w-full bg-gradient-to-r from-green-500 to-teal-600 hover:from-green-600 hover:to-teal-700 text-white font-bold py-3 px-6 rounded-xl transition transform hover:scale-105 shadow-lg text-center"
             >
-              📲 Open in Telegram Mini App
+              📋 Browse All Levels
+            </a>
+            <a
+              href="/game"
+              className="inline-block w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-6 rounded-lg transition transform hover:scale-105 shadow-lg text-center text-sm"
+            >
+              🔗 Play with API (Telegram)
             </a>
           </div>
         </div>

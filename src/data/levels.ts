@@ -1,0 +1,413 @@
+// Embedded game levels for standalone play
+// This allows the game to work without backend API
+
+export interface GameLevel {
+  level_number: number;
+  title: string;
+  question: string;
+  question_ar: string;
+  answer: string;
+  hint?: string;
+  hint_ar?: string;
+  level_type: 'math' | 'riddle' | 'detective' | 'cartoon' | 'jigsaw';
+  difficulty: 1 | 2 | 3 | 4 | 5;
+  sbr_reward: number;
+  estimated_time_seconds: number;
+}
+
+export const embeddedLevels: GameLevel[] = [
+  // Level 1 - Easy Math
+  {
+    level_number: 1,
+    title: "Welcome Challenge",
+    question: "What is the result of 15 + 27?",
+    question_ar: "ما هي نتيجة 15 + 27؟",
+    answer: "42",
+    hint: "Add the units first (5+7=12), carry over 1, then add tens (1+2+1=4)",
+    hint_ar: "اجمع الآحاد أولاً (5+7=12)، احمل 1، ثم اجمع العشرات (1+2+1=4)",
+    level_type: 'math',
+    difficulty: 1,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 30,
+  },
+  
+  // Level 2 - Riddle
+  {
+    level_number: 2,
+    title: "Riddle Challenge",
+    question: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
+    question_ar: "أنا أتكلم بدون فم وأسمع بدون أذنين. ليس لدي جسد، لكنني أحيى بالرياح. من أنا؟",
+    answer: "echo",
+    hint: "Think about sounds in nature...",
+    hint_ar: "فكر في الأصوات في الطبيعة...",
+    level_type: 'riddle',
+    difficulty: 2,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 60,
+  },
+  
+  // Level 3 - Detective Case
+  {
+    level_number: 3,
+    title: "Detective Mystery",
+    question: "A man is found dead in his room with no signs of forced entry. On his desk: a calendar showing Oct 31, a half-eaten apple, and a suicide note. How did he die?",
+    question_ar: "عُثر على رجل ميت في غرفته بدون علامات اقتحام. على مكتبه: تقويم يظهر 31 أكتوبر، تفاحة نصف مأكولة، ورسالة انتحار. كيف مات؟",
+    answer: "poison",
+    hint: "Check the apple and the date...",
+    hint_ar: "افحص التفاحة والتاريخ...",
+    level_type: 'detective',
+    difficulty: 3,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 4 - Math Speed
+  {
+    level_number: 4,
+    title: "Speed Calculation",
+    question: "If a train travels 240 kilometers in 3 hours, what is its average speed in km/h? (Answer with number only)",
+    question_ar: "إذا سافر قطار مسافة 240 كيلومتر في 3 ساعات، ما هي سرعته المتوسطة بالكم/ساعة؟ (أجب برقم فقط)",
+    answer: "80",
+    hint: "speed = distance ÷ time",
+    hint_ar: "السرعة = المسافة ÷ الزمن",
+    level_type: 'math',
+    difficulty: 2,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 60,
+  },
+  
+  // Level 5 - Logic Puzzle
+  {
+    level_number: 5,
+    title: "Logic Puzzle",
+    question: "What has keys but no locks, space but no room, and you can enter but can't go inside?",
+    question_ar: "ما الذي له مفاتيح لكن بدون أقفال، ومساحة لكن بدون غرفة، ويمكنك الدخول لكن لا يمكنك الذهاب إلى الداخل؟",
+    answer: "keyboard",
+    hint: "You're using one right now!",
+    hint_ar: "أنت تستخدم واحدًا الآن!",
+    level_type: 'riddle',
+    difficulty: 3,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 6 - Detective
+  {
+    level_number: 6,
+    title: "Crime Scene Analysis",
+    question: "A man shoots himself in a locked room. The door was locked from the inside, the key was on the floor inside, and the man is holding a gun in his hand. The windows are locked. How did he do it?",
+    question_ar: "رجل يطلق النار على نفسه في غرفة مقفلة. الباب كان مقفولاً من الداخل، المفتاح كان على الأرض بالداخل، والرجل يمسك ببندقية في يده. النوافذ مقفلة. كيف فعل ذلك؟",
+    answer: "suicide",
+    hint: "Sometimes the simple explanation is the correct one...",
+    hint_ar: "أحيانًا التفسير البسيط هو الصحيح...",
+    level_type: 'detective',
+    difficulty: 4,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 7 - Advanced Math
+  {
+    level_number: 7,
+    title: "Advanced Calculation",
+    question: "If 3x + 7 = 22, what is the value of x? (Answer with number only)",
+    question_ar: "إذا كانت 3x + 7 = 22، فما قيمة x؟ (أجب برقم فقط)",
+    answer: "5",
+    hint: "Subtract 7 from 22, then divide by 3",
+    hint_ar: "اطرح 7 من 22، ثم اقسم على 3",
+    level_type: 'math',
+    difficulty: 3,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 8 - Classic Riddle
+  {
+    level_number: 8,
+    title: "Classic Riddle",
+    question: "I have cities but no houses, forests but no trees, water but no fish. What am I?",
+    question_ar: "لدي مدن لكن بدون بيوت، غابات لكن بدون أشجار، ماء لكن بدون أسماك. من أنا؟",
+    answer: "map",
+    hint: "People use this to find their way...",
+    hint_ar: "يستخدم الناس هذا لإيجاد طريقهم...",
+    level_type: 'riddle',
+    difficulty: 2,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 9 - Detective Mystery
+  {
+    level_number: 9,
+    title: "The Missing Piece",
+    question: "A man dies alone in a phone booth. The door was locked from the inside, the windows were closed, and no one else was there. How did he die?",
+    question_ar: "رجل يموت وحده في كشك هاتف. الباب كان مقفولاً من الداخل، النوافذ كانت مغلقة، ولم يكن هناك أحد آخر. كيف مات؟",
+    answer: "accident",
+    hint: "Think about the phone booth itself...",
+    hint_ar: "فكر في كشك الهاتف نفسه...",
+    level_type: 'detective',
+    difficulty: 4,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 10 - Complex Math
+  {
+    level_number: 10,
+    title: "Number Challenge",
+    question: "What is the square root of 144? (Answer with number only)",
+    question_ar: "ما هو الجذر التربيعي لـ 144؟ (أجب برقم فقط)",
+    answer: "12",
+    hint: "12 × 12 = ?",
+    hint_ar: "12 × 12 = ؟",
+    level_type: 'math',
+    difficulty: 2,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 45,
+  },
+  
+  // Level 11 - Word Riddle
+  {
+    level_number: 11,
+    title: "Word Puzzle",
+    question: "What word becomes shorter when you add two letters to it?",
+    question_ar: "ما الكلمة التي تصبح أقصر عندما تضيف إليها حرفين؟",
+    answer: "short",
+    hint: "Think about the word itself...",
+    hint_ar: "فكر في الكلمة نفسها...",
+    level_type: 'riddle',
+    difficulty: 3,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 12 - Math Logic
+  {
+    level_number: 12,
+    title: "Number Series",
+    question: "What comes next in this sequence: 2, 6, 12, 20, 30, ?",
+    question_ar: "ما الذي يأتي بعد هذه المتوالية: 2، 6، 12، 20، 30، ؟",
+    answer: "42",
+    hint: "Look at the differences between consecutive numbers...",
+    hint_ar: "انظر إلى الفروق بين الأرقام المتتالية...",
+    level_type: 'math',
+    difficulty: 3,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 13 - Detective Case
+  {
+    level_number: 13,
+    title: "Murder Mystery",
+    question: "A woman leaves a party, goes home, and shoots herself. The police rule it a suicide because she was found holding the gun in her hand. What evidence did they miss?",
+    question_ar: "امرأة تغادر حفلة، تذهب إلى المنزل، وتطلق النار على نفسها. الشرطة تحكم بأنها انتحار لأنها وُجدت ممسكة بالبندقية في يدها. ما الدليل الذي فاتهم؟",
+    answer: "fingerprints",
+    hint: "Think about what would be on the gun...",
+    hint_ar: "فكر فيما سيكون على البندقية...",
+    level_type: 'detective',
+    difficulty: 5,
+    sbr_reward: 2.0,
+    estimated_time_seconds: 180,
+  },
+  
+  // Level 14 - Calculation
+  {
+    level_number: 14,
+    title: "Percentage Challenge",
+    question: "If 20% of a number is 40, what is the number? (Answer with number only)",
+    question_ar: "إذا كان 20% من رقم هو 40، فما هو الرقم؟ (أجب برقم فقط)",
+    answer: "200",
+    hint: "If 20% = 40, then 100% = ?",
+    hint_ar: "إذا كان 20% = 40، إذن 100% = ؟",
+    level_type: 'math',
+    difficulty: 3,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 60,
+  },
+  
+  // Level 15 - Riddle
+  {
+    level_number: 15,
+    title: "Philosophy Puzzle",
+    question: "The more you take, the more you leave behind. What are they?",
+    question_ar: "كلما أخذت أكثر، كلما تركت أكثر وراءك. ما هم؟",
+    answer: "footsteps",
+    hint: "Think about walking...",
+    hint_ar: "فكر في المشي...",
+    level_type: 'riddle',
+    difficulty: 4,
+    sbr_reward: 2.0,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 16 - Math Challenge
+  {
+    level_number: 16,
+    title: "Multiplication Master",
+    question: "What is 17 × 8? (Answer with number only)",
+    question_ar: "ما هو 17 × 8؟ (أجب برقم فقط)",
+    answer: "136",
+    hint: "Try breaking it down: 17 × 10 - 17 × 2",
+    hint_ar: "حاول تقسيمه: 17 × 10 - 17 × 2",
+    level_type: 'math',
+    difficulty: 3,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 17 - Logic Riddle
+  {
+    level_number: 17,
+    title: "Time Puzzle",
+    question: "What gets wet while drying?",
+    question_ar: "ما الذي يبلل وهو يجف؟",
+    answer: "towel",
+    hint: "You use it when taking a bath...",
+    hint_ar: "تستخدمه عند الاستحمام...",
+    level_type: 'riddle',
+    difficulty: 2,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 60,
+  },
+  
+  // Level 18 - Detective
+  {
+    level_number: 18,
+    title: "Locked Room Mystery",
+    question: "A man is found dead in a locked room. The only window is too small for anyone to pass through. The door was locked from the inside. How did the killer escape?",
+    question_ar: "عُثر على رجل ميت في غرفة مقفلة. النافذة الوحيدة صغيرة جدًا بحيث لا يمكن لأي شخص المرور من خلالها. الباب كان مقفولاً من الداخل. كيف هرب القاتل؟",
+    answer: "no killer",
+    hint: "Maybe there was no killer...",
+    hint_ar: "ربما لم يكن هناك قاتل...",
+    level_type: 'detective',
+    difficulty: 4,
+    sbr_reward: 2.0,
+    estimated_time_seconds: 150,
+  },
+  
+  // Level 19 - Math Series
+  {
+    level_number: 19,
+    title: "Pattern Recognition",
+    question: "What comes next: 3, 6, 12, 24, ? (Answer with number only)",
+    question_ar: "ما الذي يأتي بعد: 3، 6، 12، 24، ؟ (أجب برقم فقط)",
+    answer: "48",
+    hint: "Each number is double the previous one",
+    hint_ar: "كل رقم هو ضعف الرقم السابق",
+    level_type: 'math',
+    difficulty: 2,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 90,
+  },
+  
+  // Level 20 - Complex Riddle
+  {
+    level_number: 20,
+    title: "Mind Bender",
+    question: "I am always hungry, I must always be fed. The finger I touch will soon turn red. What am I?",
+    question_ar: "أنا دائمًا جائع، يجب أن أطعم دائمًا. الإصبع الذي ألمسه سيتحول إلى اللون الأحمر قريبًا. من أنا؟",
+    answer: "fire",
+    hint: "Hot and dangerous!",
+    hint_ar: "حار وخطير!",
+    level_type: 'riddle',
+    difficulty: 4,
+    sbr_reward: 2.0,
+    estimated_time_seconds: 120,
+  },
+  
+  // Level 21 - Advanced Math
+  {
+    level_number: 21,
+    title: "Division Problem",
+    question: "If 144 ÷ 12 = ?, what is the answer? (Answer with number only)",
+    question_ar: "إذا كان 144 ÷ 12 = ؟، ما هي الإجابة؟ (أجب برقم فقط)",
+    answer: "12",
+    hint: "Think about what 12 × 12 equals",
+    hint_ar: "فكر في ما يساوي 12 × 12",
+    level_type: 'math',
+    difficulty: 2,
+    sbr_reward: 1.5,
+    estimated_time_seconds: 60,
+  },
+  
+  // Level 22 - Detective Case
+  {
+    level_number: 22,
+    title: "Coded Message",
+    question: "A dead man is found with the word 'FRIDAY' written in blood. The police suspect the killer left a clue. What day was the murder committed?",
+    question_ar: "عُثر على رجل ميت مع كلمة 'FRIDAY' مكتوبة بالدم. الشرطة تشك في أن القاتل ترك دليلاً. في أي يوم تم ارتكاب الجريمة؟",
+    answer: "monday",
+    hint: "Think about the word FRIDAY and what comes after...",
+    hint_ar: "فكر في كلمة FRIDAY وما يأتي بعدها...",
+    level_type: 'detective',
+    difficulty: 5,
+    sbr_reward: 2.5,
+    estimated_time_seconds: 180,
+  },
+  
+  // Level 23 - Math Challenge
+  {
+    level_number: 23,
+    title: "Fraction Fun",
+    question: "What is 1/4 of 100? (Answer with number only)",
+    question_ar: "ما هو 1/4 من 100؟ (أجب برقم فقط)",
+    answer: "25",
+    hint: "Divide 100 by 4",
+    hint_ar: "اقسم 100 على 4",
+    level_type: 'math',
+    difficulty: 1,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 45,
+  },
+  
+  // Level 24 - Classic Logic
+  {
+    level_number: 24,
+    title: "Classic Logic",
+    question: "What has hands but can't clap?",
+    question_ar: "ما الذي له أيدي لكن لا يمكنه التصفيق؟",
+    answer: "clock",
+    hint: "It tells you the time...",
+    hint_ar: "يخبرك بالوقت...",
+    level_type: 'riddle',
+    difficulty: 1,
+    sbr_reward: 1.0,
+    estimated_time_seconds: 45,
+  },
+  
+  // Level 25 - Master Challenge
+  {
+    level_number: 25,
+    title: "Master Level",
+    question: "If you have me, you want to share me. If you share me, you haven't got me. What am I?",
+    question_ar: "إذا كان لديك أنا، تريد مشاركتي. إذا شاركتني، لا تملكني. من أنا؟",
+    answer: "secret",
+    hint: "Think about sharing...",
+    hint_ar: "فكر في المشاركة...",
+    level_type: 'riddle',
+    difficulty: 5,
+    sbr_reward: 3.0,
+    estimated_time_seconds: 180,
+  },
+];
+
+export const getEmbeddedLevel = (levelNumber: number): GameLevel | null => {
+  return embeddedLevels.find(level => level.level_number === levelNumber) || null;
+};
+
+export const getTotalEmbeddedLevels = (): number => {
+  return embeddedLevels.length;
+};
+
+export const checkAnswer = (levelNumber: number, userAnswer: string): boolean => {
+  const level = getEmbeddedLevel(levelNumber);
+  if (!level) return false;
+  
+  // Normalize answers for comparison
+  const normalizedCorrect = level.answer.toLowerCase().trim();
+  const normalizedUser = userAnswer.toLowerCase().trim();
+  
+  return normalizedCorrect === normalizedUser;
+};
+
