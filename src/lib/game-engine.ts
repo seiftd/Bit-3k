@@ -130,7 +130,9 @@ export class GameEngine {
     
     // Generate level dynamically for all levels (1-3000)
     if (this.state.currentLevel >= 1 && this.state.currentLevel <= 3000) {
-      return generateLevel(this.state.currentLevel);
+      const generated = generateLevel(this.state.currentLevel);
+      // Ensure options are present
+      return this.generateOptionsForLevel(generated);
     }
     
     return null;
