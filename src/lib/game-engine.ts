@@ -71,12 +71,61 @@ export class GameEngine {
     return { ...this.state };
   }
 
+  // Helper function to generate options for a level if missing
+  private generateOptionsForLevel(level: GameLevel): GameLevel {
+    if (level.options && level.options.length > 0) {
+      return level; // Already has options
+    }
+
+    const correct = level.answer.toLowerCase().trim();
+    const options: string[] = [correct];
+    
+    // Generate wrong answers based on level type
+    if (!isNaN(Number(correct))) {
+      // Numeric answer
+      const num = Number(correct);
+      const wrong1 = (num + Math.floor(Math.random() * 10) + 1).toString();
+      const wrong2 = Math.max(0, num - Math.floor(Math.random() * 10) - 1).toString();
+      const wrong3 = (num * (1 + Math.floor(Math.random() * 3))).toString();
+      options.push(wrong1, wrong2, wrong3);
+    } else {
+      // Text answer - generate similar wrong answers
+      const wrongAnswers = [
+        correct.split('').reverse().join(''), // reversed
+        correct + 'x', // add character
+        correct.slice(0, -1) || correct + 's', // remove last or add s
+        correct.charAt(0).toUpperCase() + correct.slice(1) + 'ing', // variation
+        'shadow', 'wind', 'mirror', 'sound', // common wrong answers
+        'door', 'safe', 'car', 'house', // more common wrongs
+      ].filter(w => w !== correct && w.length > 0 && w.length < 20);
+      
+      // Pick 3 unique wrong answers
+      const uniqueWrongs = [...new Set(wrongAnswers)].slice(0, 3);
+      options.push(...uniqueWrongs);
+    }
+    
+    // Shuffle options
+    for (let i = options.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [options[i], options[j]] = [options[j], options[i]];
+    }
+    
+    return {
+      ...level,
+      options: options.slice(0, 4),
+      options_ar: options.slice(0, 4), // Same for now
+    };
+  }
+
   // Get current level (supports up to 3000 levels)
   getCurrentLevel(): GameLevel | null {
     // Try embedded levels first (for levels 1-50)
     if (this.state.currentLevel <= 50) {
       const embedded = embeddedLevels.find(level => level.level_number === this.state.currentLevel);
-      if (embedded) return embedded;
+      if (embedded) {
+        // Generate options if missing
+        return this.generateOptionsForLevel(embedded);
+      }
     }
     
     // Generate level dynamically for all levels (1-3000)
