@@ -4,11 +4,6 @@ import { useEffect, useState, Suspense } from 'react';
 import { gameEngine, GameEngine } from '@/lib/game-engine';
 import { GameLevel } from '@/data/levels';
 import Link from 'next/link';
-import AnimatedCharacter from '@/components/AnimatedCharacter';
-import PuzzlePieces from '@/components/PuzzlePieces';
-import FloatingIcons from '@/components/FloatingIcons';
-import ConfettiAnimation from '@/components/ConfettiAnimation';
-import LevelIcon from '@/components/LevelIcon';
 
 function PlayContent() {
   const [level, setLevel] = useState<GameLevel | null>(null);
@@ -32,7 +27,6 @@ function PlayContent() {
   });
   const [engine] = useState<GameEngine>(gameEngine);
   const [showAdModal, setShowAdModal] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
     // Initialize Telegram WebApp if available
@@ -77,9 +71,7 @@ function PlayContent() {
 
     // Show ad modal between EVERY level
     if (result.correct) {
-      setShowConfetti(true);
       setShowAdModal(true);
-      setTimeout(() => setShowConfetti(false), 3000);
     }
 
     // Haptic feedback if in Telegram
@@ -138,8 +130,8 @@ function PlayContent() {
     return (
       <div className={`min-h-screen bg-gray-900 flex items-center justify-center ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="text-center">
-          <AnimatedCharacter type="brain" size="lg" />
-          <p className="text-xl text-white mt-4">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
+          <div className="text-6xl mb-4 animate-bounce-slow">⏳</div>
+          <p className="text-xl text-white">{language === 'ar' ? 'جاري التحميل...' : 'Loading...'}</p>
         </div>
       </div>
     );
@@ -150,7 +142,7 @@ function PlayContent() {
     return (
       <div className={`min-h-screen bg-gray-900 flex items-center justify-center p-4 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md text-center border border-gray-700">
-          <AnimatedCharacter type="star" size="lg" />
+          <div className="text-8xl mb-4 animate-bounce-slow">🎉</div>
           <h1 className="text-4xl font-bold mb-4 text-yellow-400">
             {language === 'ar' ? 'تهانينا!' : 'Congratulations!'}
           </h1>
@@ -189,15 +181,13 @@ function PlayContent() {
 
   const questionText = language === 'ar' && level.question_ar ? level.question_ar : level.question;
   const hintText = language === 'ar' && level.hint_ar ? level.hint_ar : level.hint;
+  const typeIcon = level.level_type === 'math' ? '🔢' : 
+                   level.level_type === 'riddle' ? '🧩' : 
+                   level.level_type === 'word' ? '📝' : 
+                   level.level_type === 'pattern' ? '🔀' : '❓';
 
   return (
-    <div className={`min-h-screen bg-gray-900 relative ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      {/* Floating Background Icons */}
-      <FloatingIcons />
-      
-      {/* Confetti Animation */}
-      <ConfettiAnimation show={showConfetti} />
-      
+    <div className={`min-h-screen bg-gray-900 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
       {/* Stats Cards Bar - Like images */}
       <div className="p-4 bg-gray-800 border-b border-gray-700">
         <div className="max-w-6xl mx-auto grid grid-cols-3 gap-3">
@@ -240,8 +230,8 @@ function PlayContent() {
               <div>
                 <div className="text-sm text-blue-100 mb-1">{language === 'ar' ? 'المستوى' : 'Level'} {level.level_number}</div>
                 <h1 className="text-2xl font-bold text-white flex items-center">
-                  <LevelIcon type={level.level_type} size="lg" animated />
-                  <span className="ml-2">{level.title}</span>
+                  <span className="text-3xl mr-2 animate-bounce-slow">{typeIcon}</span>
+                  {level.title}
                 </h1>
               </div>
               <div className="text-right">
@@ -258,12 +248,11 @@ function PlayContent() {
           {/* Question Card */}
           <div className="p-6">
             <h2 className="text-lg font-bold mb-3 text-white flex items-center">
-              <AnimatedCharacter type="brain" size="sm" className="mr-2" />
+              <span className="text-2xl mr-2">❓</span>
               {language === 'ar' ? 'السؤال' : 'Question'}
             </h2>
-            <div className="bg-gray-900 rounded-xl p-4 mb-4 border border-gray-700 relative">
-              <PuzzlePieces completed={false} />
-              <p className="text-white text-lg leading-relaxed whitespace-pre-wrap relative z-10">
+            <div className="bg-gray-900 rounded-xl p-4 mb-4 border border-gray-700">
+              <p className="text-white text-lg leading-relaxed whitespace-pre-wrap">
                 {questionText}
               </p>
             </div>
@@ -317,14 +306,7 @@ function PlayContent() {
         {result && (
           <div className={`bg-gray-800 rounded-2xl shadow-xl p-6 mb-4 border-4 ${result.correct ? 'border-green-500' : 'border-red-500'}`}>
             <div className="text-center">
-              {result.correct ? (
-                <div className="mb-4">
-                  <AnimatedCharacter type="star" size="lg" />
-                  {showConfetti && <PuzzlePieces completed={true} />}
-                </div>
-              ) : (
-                <div className="text-8xl mb-4 animate-bounce-slow">❌</div>
-              )}
+              <div className="text-8xl mb-4 animate-bounce-slow">{result.correct ? '✅' : '❌'}</div>
               <h2 className={`text-3xl font-bold mb-3 ${result.correct ? 'text-green-400' : 'text-red-400'}`}>
                 {result.correct ? (language === 'ar' ? 'صحيح!' : 'Correct!') : (language === 'ar' ? 'خطأ!' : 'Incorrect!')}
               </h2>
