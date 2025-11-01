@@ -2,6 +2,7 @@
 // This handles local state management for the embedded game
 
 import { embeddedLevels, GameLevel } from '@/data/levels';
+import { getLevel as generateLevel } from '@/lib/level-generator';
 
 export interface GameState {
   currentLevel: number;
@@ -70,9 +71,20 @@ export class GameEngine {
     return { ...this.state };
   }
 
-  // Get current level
+  // Get current level (supports up to 3000 levels)
   getCurrentLevel(): GameLevel | null {
-    return embeddedLevels.find(level => level.level_number === this.state.currentLevel) || null;
+    // Try embedded levels first (for levels 1-50)
+    if (this.state.currentLevel <= 50) {
+      const embedded = embeddedLevels.find(level => level.level_number === this.state.currentLevel);
+      if (embedded) return embedded;
+    }
+    
+    // Generate level dynamically for all levels (1-3000)
+    if (this.state.currentLevel >= 1 && this.state.currentLevel <= 3000) {
+      return generateLevel(this.state.currentLevel);
+    }
+    
+    return null;
   }
 
   // Submit answer for current level
@@ -213,10 +225,11 @@ export class GameEngine {
 
   // Get statistics
   getStats() {
+    const totalLevels = 3000; // Total levels supported
     return {
       ...this.state,
-      totalEmbeddedLevels: embeddedLevels.length,
-      progressPercentage: Math.round((this.state.levelsCompleted / embeddedLevels.length) * 100),
+      totalEmbeddedLevels: totalLevels,
+      progressPercentage: Math.round((this.state.levelsCompleted / totalLevels) * 100),
       averageAttempts: this.getAverageAttempts(),
     };
   }
