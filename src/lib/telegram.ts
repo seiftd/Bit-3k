@@ -30,6 +30,13 @@ export function getReferralCode(): string {
   return 'BIT3K123'; // Fallback
 }
 
+export function getReferralLink(): string {
+  const botUsername = process.env.NEXT_PUBLIC_BOT_USERNAME || 'Bitme3kbot';
+  const referralCode = getReferralCode();
+  // Telegram bot deep link with start parameter
+  return `https://t.me/${botUsername}?start=${referralCode}`;
+}
+
 export function isInTelegram(): boolean {
   if (typeof window === 'undefined') return false;
   return !!window.Telegram?.WebApp;

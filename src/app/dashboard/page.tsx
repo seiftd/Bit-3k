@@ -5,7 +5,7 @@ import { gameEngine } from '@/lib/game-engine';
 import Link from 'next/link';
 import NavigationBar from '@/components/NavigationBar';
 import FloatingIcons from '@/components/FloatingIcons';
-import { getTelegramUser, getReferralCode, isInTelegram } from '@/lib/telegram';
+import { getTelegramUser, getReferralCode, getReferralLink, isInTelegram } from '@/lib/telegram';
 import { getLanguage, setLanguage, getLanguageDirection } from '@/lib/language';
 import { initializeTelegramWebApp } from '@/lib/telegram';
 
@@ -40,6 +40,7 @@ export default function DashboardPage() {
   const [telegramUser, setTelegramUser] = useState<ReturnType<typeof getTelegramUser>>(null);
   const [referrals, setReferrals] = useState({ total: 0, level1: 0, level2: 0 });
   const [referralCode, setReferralCode] = useState('BIT3K123');
+  const [referralLink, setReferralLink] = useState('');
   const [dailyMissions, setDailyMissions] = useState({
     login: { completed: false, reward: 5 },
     play: { completed: false, reward: 3 },
@@ -57,6 +58,7 @@ export default function DashboardPage() {
     if (user) {
       setTelegramUser(user);
       setReferralCode(getReferralCode());
+      setReferralLink(getReferralLink());
       
       // Set language from Telegram or localStorage
       const savedLang = getLanguage();
@@ -173,10 +175,13 @@ export default function DashboardPage() {
     return translations[language][key] || key;
   };
 
-  const copyReferralCode = () => {
+  const copyReferralLink = () => {
     if (typeof window === 'undefined') return;
-    navigator.clipboard.writeText(referralCode);
-    alert(t('copied'));
+    const linkToCopy = referralLink || getReferralLink();
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(linkToCopy);
+      alert(t('copied'));
+    }
   };
 
   const claimMission = (missionKey: string) => {
@@ -391,19 +396,32 @@ export default function DashboardPage() {
               <h2 className="text-2xl font-bold mb-4 text-white">🤝 {t('referrals')}</h2>
               <div className="bg-gray-700 rounded-xl p-4 mb-4">
                 <div className="text-sm text-gray-400 mb-2">{t('referralCode')}</div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 mb-3">
                   <input
                     type="text"
                     value={referralCode}
                     readOnly
-                    className="flex-1 px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg font-mono font-bold text-blue-400"
+                    className="flex-1 px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg font-mono font-bold text-blue-400 text-sm"
+                  />
+                </div>
+                <div className="text-sm text-gray-400 mb-2">🔗 {language === 'ar' ? 'رابط الدعوة' : 'Referral Link'}</div>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="text"
+                    value={referralLink || getReferralLink()}
+                    readOnly
+                    className="flex-1 px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg font-mono text-sm text-blue-400 break-all"
                   />
                   <button
-                    onClick={copyReferralCode}
+                    onClick={copyReferralLink}
                     className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
+                    title={language === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
                   >
                     📋
                   </button>
+                </div>
+                <div className="mt-3 text-xs text-gray-500 text-center">
+                  {language === 'ar' ? 'شارك هذا الرابط مع أصدقائك!' : 'Share this link with your friends!'}
                 </div>
               </div>
               

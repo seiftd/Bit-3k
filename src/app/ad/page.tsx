@@ -21,24 +21,78 @@ function AdPageContent() {
   const [adWatched, setAdWatched] = useState(false);
 
   useEffect(() => {
+    // Load monetization script dynamically
+    const loadAdScript = () => {
+      if (typeof window === 'undefined') return;
+      
+      // Check if script already loaded
+      if (window.show_10119514) {
+        return Promise.resolve();
+      }
+      
+      // Check if script tag exists
+      const existingScript = document.querySelector('script[src="/monetization.js"]');
+      if (existingScript) {
+        return new Promise<void>((resolve) => {
+          let attempts = 0;
+          const checkInterval = setInterval(() => {
+            if (window.show_10119514) {
+              clearInterval(checkInterval);
+              resolve();
+            } else if (attempts++ > 20) {
+              clearInterval(checkInterval);
+              resolve(); // Timeout, continue anyway
+            }
+          }, 100);
+        });
+      }
+      
+      // Load script dynamically
+      return new Promise<void>((resolve) => {
+        const script = document.createElement('script');
+        script.src = '/monetization.js';
+        script.async = true;
+        script.onload = () => {
+          // Wait a bit for the function to be available
+          let attempts = 0;
+          const checkInterval = setInterval(() => {
+            if (window.show_10119514) {
+              clearInterval(checkInterval);
+              resolve();
+            } else if (attempts++ > 20) {
+              clearInterval(checkInterval);
+              resolve(); // Timeout, continue anyway
+            }
+          }, 100);
+        };
+        script.onerror = () => {
+          console.warn('Failed to load monetization script');
+          resolve(); // Continue anyway
+        };
+        document.head.appendChild(script);
+      });
+    };
+
     if (!adToken) {
       setError('Invalid ad token');
       return;
     }
 
-    // Show monetization ad immediately
+    // Show monetization ad
     const showAd = async () => {
       try {
-        // Wait a bit for script to load
-        await new Promise(resolve => setTimeout(resolve, 500));
+        // Load script first
+        await loadAdScript();
+        
+        // Wait a bit more
+        await new Promise(resolve => setTimeout(resolve, 300));
         
         if (typeof window !== 'undefined' && window.show_10119514) {
           await window.show_10119514();
           // After ad is watched
           setAdWatched(true);
-          alert('You have seen an ad!');
         } else {
-          // If monetization script not loaded, continue anyway
+          // If monetization script not loaded, continue anyway (for testing)
           console.warn('Monetization script not loaded, continuing anyway');
           setAdWatched(true);
         }
@@ -114,35 +168,39 @@ function AdPageContent() {
       const authData = await authResponse.json();
       const token = authData.access_token;
 
-      // Complete the ad
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ads/completed`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          ad_token: adToken,
-          watch_duration: 15,
-        }),
-      });
+      // Try to complete the ad via API (optional, skip if API not available)
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+        const response = await fetch(`${apiUrl}/ads/completed`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            ad_token: adToken,
+            watch_duration: 15,
+          }),
+        });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Failed to complete ad');
+        if (!response.ok) {
+          // Log but don't fail - ad was watched
+          console.warn('Failed to register ad completion with API, but ad was watched');
+        }
+      } catch (apiError) {
+        // API call failed, but ad was watched - continue anyway
+        console.warn('API error (continuing anyway):', apiError);
       }
 
-      const data = await response.json();
       setCompleted(true);
 
-      // Show success message and close
+      // Redirect back to game
+      const redirect = searchParams.get('redirect') || '/play';
       setTimeout(() => {
-        if (telegramWebApp) {
-          telegramWebApp.close();
-        } else {
-          window.close();
+        if (typeof window !== 'undefined') {
+          window.location.href = redirect;
         }
-      }, 2000);
+      }, 1500);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
