@@ -5,7 +5,19 @@ import { gameEngine } from '@/lib/game-engine';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState({
+  const [stats, setStats] = useState<{
+    currentLevel: number;
+    sbrBalance: number;
+    totalEarned: number;
+    levelsCompleted: number;
+    totalAdsWatched: number;
+    attempts: Record<number, number>;
+    completedLevels: number[];
+    lastPlayedAt: Date;
+    totalEmbeddedLevels: number;
+    progressPercentage: number;
+    averageAttempts: number;
+  }>({
     currentLevel: 1,
     sbrBalance: 0,
     totalEarned: 0,
