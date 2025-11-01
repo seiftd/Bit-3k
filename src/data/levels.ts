@@ -7,6 +7,8 @@ export interface GameLevel {
   question: string;
   question_ar: string;
   answer: string;
+  options?: string[]; // 4 multiple choice options
+  options_ar?: string[]; // Arabic options
   hint?: string;
   hint_ar?: string;
   level_type: 'math' | 'riddle' | 'detective' | 'cartoon' | 'jigsaw' | 'word' | 'pattern' | 'logic';
@@ -23,6 +25,8 @@ export const embeddedLevels: GameLevel[] = [
     question: "What is the result of 15 + 27?",
     question_ar: "ما هي نتيجة 15 + 27؟",
     answer: "42",
+    options: ["42", "40", "44", "38"],
+    options_ar: ["42", "40", "44", "38"],
     hint: "Add the units first (5+7=12), carry over 1, then add tens (1+2+1=4)",
     hint_ar: "اجمع الآحاد أولاً (5+7=12)، احمل 1، ثم اجمع العشرات (1+2+1=4)",
     level_type: 'math',

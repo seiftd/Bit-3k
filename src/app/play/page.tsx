@@ -16,7 +16,7 @@ import { initializeTelegramWebApp } from '@/lib/telegram';
 function PlayContent() {
   const [level, setLevel] = useState<GameLevel | null>(null);
   const [loading, setLoading] = useState(true);
-  const [answer, setAnswer] = useState('');
+  const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [showHint, setShowHint] = useState(false);
   const [result, setResult] = useState<{ correct: boolean; message: string; sbrEarned: number; needsAd?: boolean } | null>(null);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
@@ -56,7 +56,7 @@ function PlayContent() {
     if (currentLevel) {
       setLevel(currentLevel);
       setLoading(false);
-      setAnswer('');
+      setSelectedAnswer(null);
       setResult(null);
       setShowHint(false);
       setStats(engine.getStats());
@@ -66,10 +66,11 @@ function PlayContent() {
     }
   };
 
-  const handleSubmit = () => {
-    if (!level || !answer.trim()) return;
+  const handleSubmit = (selectedOption?: string) => {
+    const answerToSubmit = selectedOption || selectedAnswer;
+    if (!level || !answerToSubmit) return;
 
-    const result = engine.submitAnswer(answer.trim());
+    const result = engine.submitAnswer(answerToSubmit);
     setResult(result);
     setStats(engine.getStats());
 
@@ -90,11 +91,12 @@ function PlayContent() {
     setShowAdModal(false);
     setResult(null);
     setShowHint(false);
+    setSelectedAnswer(null);
     const nextLevel = engine.nextLevel();
     
     if (nextLevel) {
       setLevel(nextLevel);
-      setAnswer('');
+      setSelectedAnswer(null);
     } else {
       // Game completed!
       setLevel(null);
@@ -187,6 +189,7 @@ function PlayContent() {
 
   const questionText = language === 'ar' && level.question_ar ? level.question_ar : level.question;
   const hintText = language === 'ar' && level.hint_ar ? level.hint_ar : level.hint;
+  const options = (language === 'ar' && level.options_ar) ? level.options_ar : (level.options || []);
 
   return (
     <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
@@ -286,28 +289,70 @@ function PlayContent() {
           </div>
         </div>
 
-        {/* Answer Card */}
+        {/* Answer Options Card */}
         {!result && (
           <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-4 border border-gray-700">
-            <label className="block text-white font-bold mb-3 text-lg">
-              ✍️ {language === 'ar' ? 'إجابتك' : 'Your Answer'}
+            <label className="block text-white font-bold mb-4 text-lg">
+              ✍️ {language === 'ar' ? 'اختر الإجابة الصحيحة' : 'Choose the correct answer'}
             </label>
-            <input
-              type="text"
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-              placeholder={language === 'ar' ? 'اكتب إجابتك هنا...' : 'Type your answer here...'}
-              className="w-full px-4 py-4 bg-gray-900 border-2 border-gray-600 rounded-xl focus:border-blue-500 focus:outline-none text-white text-lg transition placeholder-gray-500"
-              autoFocus
-            />
-            <button
-              onClick={handleSubmit}
-              disabled={!answer.trim()}
-              className="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition transform hover:scale-105 disabled:scale-100 text-lg shadow-lg"
-            >
-              {language === 'ar' ? '🚀 إرسال الإجابة' : '🚀 Submit Answer'}
-            </button>
+            
+            {options.length > 0 ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {options.map((option, index) => {
+                  const optionLetters = ['A', 'B', 'C', 'D'];
+                  const isSelected = selectedAnswer === option;
+                  
+                  return (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setSelectedAnswer(option);
+                        // Auto submit after selection
+                        setTimeout(() => handleSubmit(option), 300);
+                      }}
+                      className={`relative p-4 rounded-xl border-2 transition transform hover:scale-105 text-left ${
+                        isSelected
+                          ? 'border-blue-500 bg-blue-900/30'
+                          : 'border-gray-600 bg-gray-700 hover:border-blue-400 hover:bg-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center space-x-3">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-lg ${
+                          isSelected
+                            ? 'bg-blue-500 text-white'
+                            : 'bg-gray-600 text-gray-300'
+                        }`}>
+                          {optionLetters[index]}
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-white font-semibold text-lg">{option}</div>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              // Fallback to text input if no options available
+              <div>
+                <input
+                  type="text"
+                  value={selectedAnswer || ''}
+                  onChange={(e) => setSelectedAnswer(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && selectedAnswer && handleSubmit()}
+                  placeholder={language === 'ar' ? 'اكتب إجابتك هنا...' : 'Type your answer here...'}
+                  className="w-full px-4 py-4 bg-gray-900 border-2 border-gray-600 rounded-xl focus:border-blue-500 focus:outline-none text-white text-lg transition placeholder-gray-500"
+                  autoFocus
+                />
+                <button
+                  onClick={() => selectedAnswer && handleSubmit()}
+                  disabled={!selectedAnswer?.trim()}
+                  className="mt-4 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white font-bold py-4 px-6 rounded-xl transition transform hover:scale-105 disabled:scale-100 text-lg shadow-lg"
+                >
+                  {language === 'ar' ? '🚀 إرسال الإجابة' : '🚀 Submit Answer'}
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -350,7 +395,7 @@ function PlayContent() {
                 <button
                   onClick={() => {
                     setResult(null);
-                    setAnswer('');
+                    setSelectedAnswer(null);
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition transform hover:scale-105 text-lg"
                 >
