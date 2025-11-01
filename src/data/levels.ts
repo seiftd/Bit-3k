@@ -9,7 +9,7 @@ export interface GameLevel {
   answer: string;
   hint?: string;
   hint_ar?: string;
-  level_type: 'math' | 'riddle' | 'detective' | 'cartoon' | 'jigsaw';
+  level_type: 'math' | 'riddle' | 'detective' | 'cartoon' | 'jigsaw' | 'word' | 'pattern' | 'logic';
   difficulty: 1 | 2 | 3 | 4 | 5;
   sbr_reward: number;
   estimated_time_seconds: number;
