@@ -5,9 +5,22 @@ import { gameEngine } from '@/lib/game-engine';
 import Link from 'next/link';
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState(gameEngine.getStats());
+  const [stats, setStats] = useState({
+    currentLevel: 1,
+    sbrBalance: 0,
+    totalEarned: 0,
+    levelsCompleted: 0,
+    totalAdsWatched: 0,
+    attempts: {},
+    completedLevels: [],
+    lastPlayedAt: new Date(),
+    totalEmbeddedLevels: 50,
+    progressPercentage: 0,
+    averageAttempts: 0,
+  });
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const [referrals, setReferrals] = useState({ total: 0, level1: 0, level2: 0 });
+  const [referralCode, setReferralCode] = useState('BIT3K123');
   const [dailyMissions, setDailyMissions] = useState({
     login: { completed: false, reward: 5 },
     play: { completed: false, reward: 3 },
@@ -16,8 +29,11 @@ export default function DashboardPage() {
   });
 
   useEffect(() => {
+    // Only run on client side
+    if (typeof window === 'undefined') return;
+
     // Initialize Telegram WebApp if available
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
+    if (window.Telegram?.WebApp) {
       const tg = window.Telegram.WebApp;
       tg.ready();
       tg.expand();
@@ -25,6 +41,7 @@ export default function DashboardPage() {
       const user = tg.initDataUnsafe?.user;
       if (user) {
         setLanguage((user.language_code || 'en').startsWith('ar') ? 'ar' : 'en');
+        setReferralCode('BIT3K' + user.id);
       }
     }
 
@@ -33,6 +50,8 @@ export default function DashboardPage() {
   }, []);
 
   const loadStats = () => {
+    if (typeof window === 'undefined') return;
+    
     const currentStats = gameEngine.getStats();
     setStats(currentStats);
     
@@ -115,8 +134,8 @@ export default function DashboardPage() {
   };
 
   const copyReferralCode = () => {
-    const code = 'BIT3K' + (window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '123');
-    navigator.clipboard.writeText(code);
+    if (typeof window === 'undefined') return;
+    navigator.clipboard.writeText(referralCode);
     alert(t('copied'));
   };
 
@@ -128,21 +147,21 @@ export default function DashboardPage() {
     }
     
     // Award SBR
-    const newStats = gameEngine.getStats();
-    newStats.sbrBalance += mission.reward;
-    newStats.totalEarned += mission.reward;
-    
-    // Mark as claimed
-    setDailyMissions(prev => ({
-      ...prev,
-      [missionKey]: { ...prev[missionKey as keyof typeof prev], completed: false },
-    }));
-    
-    alert(`${t('claim')} +${mission.reward} SBR!`);
-    loadStats();
+    if (typeof window !== 'undefined') {
+      const newStats = gameEngine.getStats();
+      newStats.sbrBalance += mission.reward;
+      newStats.totalEarned += mission.reward;
+      
+      // Mark as claimed
+      setDailyMissions(prev => ({
+        ...prev,
+        [missionKey]: { ...prev[missionKey as keyof typeof prev], completed: false },
+      }));
+      
+      alert(`${t('claim')} +${mission.reward} SBR!`);
+      loadStats();
+    }
   };
-
-  const referralCode = 'BIT3K' + (window.Telegram?.WebApp?.initDataUnsafe?.user?.id || '123');
 
   return (
     <div className={`min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
