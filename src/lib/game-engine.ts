@@ -80,28 +80,98 @@ export class GameEngine {
     const correct = level.answer.toLowerCase().trim();
     const options: string[] = [correct];
     
-    // Generate wrong answers based on level type
+    // Generate wrong answers based on level type and answer
     if (!isNaN(Number(correct))) {
-      // Numeric answer
+      // Numeric answer - generate reasonable wrong numbers
       const num = Number(correct);
-      const wrong1 = (num + Math.floor(Math.random() * 10) + 1).toString();
-      const wrong2 = Math.max(0, num - Math.floor(Math.random() * 10) - 1).toString();
-      const wrong3 = (num * (1 + Math.floor(Math.random() * 3))).toString();
-      options.push(wrong1, wrong2, wrong3);
+      const wrongAnswers: number[] = [];
+      
+      // Add numbers close to the correct answer but not too close
+      wrongAnswers.push(num + Math.floor(Math.random() * 20) + 5);
+      wrongAnswers.push(Math.max(0, num - Math.floor(Math.random() * 20) - 5));
+      wrongAnswers.push(Math.round(num * 1.5));
+      wrongAnswers.push(Math.round(num * 0.5));
+      wrongAnswers.push(num + 10);
+      wrongAnswers.push(num - 10);
+      
+      // Remove duplicates and the correct answer, then take 3
+      const uniqueWrongs = [...new Set(wrongAnswers)]
+        .filter(w => w !== num && w >= 0)
+        .slice(0, 3);
+      
+      options.push(...uniqueWrongs.map(w => w.toString()));
     } else {
-      // Text answer - generate similar wrong answers
-      const wrongAnswers = [
-        correct.split('').reverse().join(''), // reversed
-        correct + 'x', // add character
-        correct.slice(0, -1) || correct + 's', // remove last or add s
-        correct.charAt(0).toUpperCase() + correct.slice(1) + 'ing', // variation
-        'shadow', 'wind', 'mirror', 'sound', // common wrong answers
-        'door', 'safe', 'car', 'house', // more common wrongs
-      ].filter(w => w !== correct && w.length > 0 && w.length < 20);
+      // Text answer - generate logical wrong answers based on level type
+      let wrongAnswers: string[] = [];
+      
+      // Get wrong answers based on level type
+      switch (level.level_type) {
+        case 'riddle':
+        case 'detective':
+          // For riddles, use related but incorrect words
+          wrongAnswers = [
+            'shadow', 'wind', 'mirror', 'sound', 'voice', 'light',
+            'dark', 'silence', 'music', 'noise', 'whisper',
+            'door', 'key', 'lock', 'window', 'house', 'room',
+            'clock', 'time', 'hour', 'minute', 'second',
+            'map', 'globe', 'world', 'earth', 'planet',
+            'towel', 'cloth', 'sponge', 'paper', 'tissue'
+          ];
+          break;
+          
+        case 'word':
+          // For word puzzles, use similar length words
+          wrongAnswers = [
+            'apple', 'water', 'music', 'light', 'happy', 'sad',
+            'word', 'text', 'letter', 'sentence', 'phrase',
+            'book', 'page', 'read', 'write', 'draw', 'paint'
+          ];
+          break;
+          
+        default:
+          // Generic wrong answers
+          wrongAnswers = [
+            'answer', 'solution', 'result', 'choice', 'option',
+            'question', 'puzzle', 'riddle', 'challenge', 'game'
+          ];
+      }
+      
+      // Filter out the correct answer and similar ones
+      const filtered = wrongAnswers
+        .filter(w => {
+          const lower = w.toLowerCase();
+          // Remove if too similar to correct answer
+          if (lower === correct) return false;
+          if (lower.includes(correct) || correct.includes(lower)) return false;
+          if (lower.length < 3 || lower.length > 15) return false;
+          return true;
+        });
       
       // Pick 3 unique wrong answers
-      const uniqueWrongs = [...new Set(wrongAnswers)].slice(0, 3);
+      const uniqueWrongs = [...new Set(filtered)].slice(0, 3);
       options.push(...uniqueWrongs);
+      
+      // If we don't have enough, add some generic ones
+      while (options.length < 4) {
+        const generic = ['choice', 'answer', 'option', 'result'][options.length - 1];
+        if (generic && !options.includes(generic)) {
+          options.push(generic);
+        } else {
+          break;
+        }
+      }
+    }
+    
+    // Ensure we have exactly 4 options
+    while (options.length < 4) {
+      const fallback = !isNaN(Number(correct)) 
+        ? (Number(correct) + options.length * 10).toString()
+        : `option${options.length}`;
+      if (!options.includes(fallback)) {
+        options.push(fallback);
+      } else {
+        break;
+      }
     }
     
     // Shuffle options

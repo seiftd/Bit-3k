@@ -42,6 +42,8 @@ export const embeddedLevels: GameLevel[] = [
     question: "I speak without a mouth and hear without ears. I have no body, but I come alive with wind. What am I?",
     question_ar: "أنا أتكلم بدون فم وأسمع بدون أذنين. ليس لدي جسد، لكنني أحيى بالرياح. من أنا؟",
     answer: "echo",
+    options: ["echo", "wind", "shadow", "mirror"],
+    options_ar: ["echo", "wind", "shadow", "mirror"],
     hint: "Think about sounds in nature...",
     hint_ar: "فكر في الأصوات في الطبيعة...",
     level_type: 'riddle',
