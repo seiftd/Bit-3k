@@ -1,6 +1,8 @@
 // Dynamic level generator for 3000 levels
 // Generates levels with progressive difficulty
 
+import { translateOptionsToArabic } from './translations';
+
 export interface GameLevel {
   level_number: number;
   title: string;
@@ -85,6 +87,7 @@ function generateMathPuzzle(level: number): GameLevel {
     hint_ar = `استخدم العملية الحسابية الأساسية`;
     
     const options = generateOptions(answer, level);
+    const arabicOptions = translateOptionsToArabic(options);
     
     return {
       level_number: level,
@@ -93,7 +96,7 @@ function generateMathPuzzle(level: number): GameLevel {
       question_ar,
       answer,
       options,
-      options_ar: options, // Same for math numbers
+      options_ar: arabicOptions,
       hint,
       hint_ar,
       level_type: 'math',
@@ -243,6 +246,7 @@ function generateRiddle(level: number): GameLevel {
   const difficulty = Math.min(5, Math.ceil(level / 600));
   
   const options = [riddle.a, ...riddle.wrong].sort(() => Math.random() - 0.5).slice(0, 4);
+  const arabicOptions = translateOptionsToArabic(options);
   
   return {
     level_number: level,
@@ -251,7 +255,7 @@ function generateRiddle(level: number): GameLevel {
     question_ar: riddle.qa,
     answer: riddle.a,
     options,
-    options_ar: options, // Same for simple words
+    options_ar: arabicOptions,
     hint: riddle.h,
     hint_ar: riddle.ha,
     level_type: 'riddle',
@@ -277,6 +281,7 @@ function generateWordPuzzle(level: number): GameLevel {
   const difficulty = Math.min(5, Math.ceil(level / 600));
   
   const options = [wordData.word, ...wordData.wrong].sort(() => Math.random() - 0.5).slice(0, 4);
+  const arabicOptions = translateOptionsToArabic(options);
   
   return {
     level_number: level,
@@ -285,7 +290,7 @@ function generateWordPuzzle(level: number): GameLevel {
     question_ar: `أرتب هذه الأحرف لتكوين كلمة: ${scrambled.toUpperCase()}. ما هي الكلمة؟`,
     answer: wordData.word,
     options,
-    options_ar: options,
+    options_ar: arabicOptions,
     hint: wordData.hint,
     hint_ar: wordData.hint,
     level_type: 'word',
@@ -307,6 +312,7 @@ function generatePatternPuzzle(level: number): GameLevel {
   
   const pattern = patterns[(level - 1) % patterns.length];
   const options = generateOptions(pattern.next.toString(), level);
+  const arabicOptions = translateOptionsToArabic(options);
   
   return {
     level_number: level,
@@ -315,7 +321,7 @@ function generatePatternPuzzle(level: number): GameLevel {
     question_ar: `ما الذي يأتي بعد: ${pattern.seq.join('، ')}, ؟`,
     answer: pattern.next.toString(),
     options,
-    options_ar: options,
+    options_ar: arabicOptions,
     hint: pattern.hint,
     hint_ar: pattern.hint,
     level_type: 'pattern',

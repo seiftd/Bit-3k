@@ -3,6 +3,7 @@
 
 import { embeddedLevels, GameLevel } from '@/data/levels';
 import { getLevel as generateLevel } from '@/lib/level-generator';
+import { translateOptionsToArabic, translateArabicToEnglish } from '@/lib/translations';
 
 export interface GameState {
   currentLevel: number;
@@ -180,10 +181,13 @@ export class GameEngine {
       [options[i], options[j]] = [options[j], options[i]];
     }
     
+    // Generate Arabic translations for options
+    const arabicOptions = translateOptionsToArabic(options.slice(0, 4));
+    
     return {
       ...level,
       options: options.slice(0, 4),
-      options_ar: options.slice(0, 4), // Same for now
+      options_ar: arabicOptions,
     };
   }
 
@@ -225,8 +229,18 @@ export class GameEngine {
     }
 
     // Normalize answers
+    // If user selected an Arabic option, convert it back to English for comparison
+    let normalizedUser = userAnswer.toLowerCase().trim();
+    if (level.options && level.options.length > 0) {
+      // Check if the answer is in Arabic format
+      const isArabicOption = level.options_ar?.includes(userAnswer);
+      if (isArabicOption && level.options) {
+        // Convert Arabic back to English
+        normalizedUser = translateArabicToEnglish(userAnswer, level.options).toLowerCase().trim();
+      }
+    }
+    
     const normalizedCorrect = level.answer.toLowerCase().trim();
-    const normalizedUser = userAnswer.toLowerCase().trim();
     const isCorrect = normalizedCorrect === normalizedUser;
 
     // Track attempt
