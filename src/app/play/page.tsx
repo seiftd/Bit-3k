@@ -9,6 +9,9 @@ import PuzzlePieces from '@/components/PuzzlePieces';
 import FloatingIcons from '@/components/FloatingIcons';
 import ConfettiAnimation from '@/components/ConfettiAnimation';
 import LevelIcon from '@/components/LevelIcon';
+import NavigationBar from '@/components/NavigationBar';
+import { getLanguage, getLanguageDirection } from '@/lib/language';
+import { initializeTelegramWebApp } from '@/lib/telegram';
 
 function PlayContent() {
   const [level, setLevel] = useState<GameLevel | null>(null);
@@ -36,15 +39,10 @@ function PlayContent() {
 
   useEffect(() => {
     // Initialize Telegram WebApp if available
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      
-      const user = tg.initDataUnsafe?.user;
-      if (user) {
-        setLanguage((user.language_code || 'en').startsWith('ar') ? 'ar' : 'en');
-      }
+    if (typeof window !== 'undefined') {
+      initializeTelegramWebApp();
+      const currentLang = getLanguage();
+      setLanguage(currentLang);
     }
 
     // Load current level
@@ -191,7 +189,7 @@ function PlayContent() {
   const hintText = language === 'ar' && level.hint_ar ? level.hint_ar : level.hint;
 
   return (
-    <div className={`min-h-screen bg-gray-900 relative ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
+    <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
       {/* Floating Background Icons */}
       <FloatingIcons />
       
@@ -364,31 +362,8 @@ function PlayContent() {
         )}
       </div>
 
-      {/* Bottom Navigation Bar - Like images */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gray-800 border-t border-gray-700 p-2">
-        <div className="max-w-4xl mx-auto grid grid-cols-5 gap-1">
-          <Link href="/" className="flex flex-col items-center py-2 rounded-lg hover:bg-gray-700 transition">
-            <div className="text-2xl">🏠</div>
-            <div className="text-xs text-gray-400">{language === 'ar' ? 'الرئيسية' : 'Home'}</div>
-          </Link>
-          <Link href="/play" className="flex flex-col items-center py-2 rounded-lg bg-blue-600 rounded-xl transition">
-            <div className="text-2xl">🎮</div>
-            <div className="text-xs text-white font-semibold">{language === 'ar' ? 'العب' : 'Play'}</div>
-          </Link>
-          <Link href="/levels" className="flex flex-col items-center py-2 rounded-lg hover:bg-gray-700 transition">
-            <div className="text-2xl">📋</div>
-            <div className="text-xs text-gray-400">{language === 'ar' ? 'المستويات' : 'Levels'}</div>
-          </Link>
-          <Link href="/dashboard" className="flex flex-col items-center py-2 rounded-lg hover:bg-gray-700 transition">
-            <div className="text-2xl">📊</div>
-            <div className="text-xs text-gray-400">{language === 'ar' ? 'الإحصائيات' : 'Stats'}</div>
-          </Link>
-          <Link href="/dashboard" className="flex flex-col items-center py-2 rounded-lg hover:bg-gray-700 transition">
-            <div className="text-2xl">👤</div>
-            <div className="text-xs text-gray-400">{language === 'ar' ? 'الملف' : 'Profile'}</div>
-          </Link>
-        </div>
-      </div>
+      {/* Navigation Bar */}
+      <NavigationBar language={language} />
     </div>
   );
 }

@@ -2,8 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { gameEngine } from '@/lib/game-engine';
-import { embeddedLevels, getEmbeddedLevel } from '@/data/levels';
+import { getLevel } from '@/lib/level-generator';
 import Link from 'next/link';
+import NavigationBar from '@/components/NavigationBar';
+import LevelIcon from '@/components/LevelIcon';
+import FloatingIcons from '@/components/FloatingIcons';
+import { getLanguage, getLanguageDirection } from '@/lib/language';
+import { initializeTelegramWebApp } from '@/lib/telegram';
 
 interface LevelWithStatus {
   level_number: number;
@@ -17,61 +22,73 @@ interface LevelWithStatus {
 
 export default function LevelsPage() {
   const [levels, setLevels] = useState<LevelWithStatus[]>([]);
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
-  const [stats, setStats] = useState(gameEngine.getStats());
+  const [language, setLanguage] = useState<'en' | 'ar'>(getLanguage());
+  const [stats, setStats] = useState({
+    currentLevel: 1,
+    sbrBalance: 0,
+    totalEarned: 0,
+    levelsCompleted: 0,
+    totalAdsWatched: 0,
+    attempts: {} as Record<number, number>,
+    completedLevels: [] as number[],
+    lastPlayedAt: new Date(),
+    totalEmbeddedLevels: 3000,
+    progressPercentage: 0,
+    averageAttempts: 0,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const levelsPerPage = 24;
 
   useEffect(() => {
-    // Initialize Telegram WebApp if available
-    if (typeof window !== 'undefined' && window.Telegram?.WebApp) {
-      const tg = window.Telegram.WebApp;
-      tg.ready();
-      tg.expand();
-      
-      const user = tg.initDataUnsafe?.user;
-      if (user) {
-        setLanguage((user.language_code || 'en').startsWith('ar') ? 'ar' : 'en');
-      }
-    }
-
-    // Load all levels with status
+    if (typeof window === 'undefined') return;
+    
+    initializeTelegramWebApp();
+    setLanguage(getLanguage());
     loadLevels();
   }, []);
 
   const loadLevels = () => {
-    const levelStatuses: LevelWithStatus[] = embeddedLevels.map(level => ({
-      level_number: level.level_number,
-      title: level.title,
-      level_type: level.level_type,
-      difficulty: level.difficulty,
-      sbr_reward: level.sbr_reward,
-      completed: gameEngine.isLevelCompleted(level.level_number),
-      unlocked: gameEngine.isLevelUnlocked(level.level_number),
-    }));
+    if (typeof window === 'undefined') return;
+    
+    const currentStats = gameEngine.getStats();
+    setStats(currentStats);
+    
+    // Generate levels for current page
+    const start = (currentPage - 1) * levelsPerPage + 1;
+    const end = Math.min(start + levelsPerPage - 1, 3000);
+    
+    const levelStatuses: LevelWithStatus[] = [];
+    for (let i = start; i <= end; i++) {
+      const level = getLevel(i);
+      if (level) {
+        levelStatuses.push({
+          level_number: level.level_number,
+          title: level.title,
+          level_type: level.level_type,
+          difficulty: level.difficulty,
+          sbr_reward: level.sbr_reward,
+          completed: gameEngine.isLevelCompleted(level.level_number),
+          unlocked: gameEngine.isLevelUnlocked(level.level_number),
+        });
+      }
+    }
 
     setLevels(levelStatuses);
-    setStats(gameEngine.getStats());
   };
 
-  const getTypeIcon = (type: string): string => {
-    const icons: Record<string, string> = {
-      math: '🔢',
-      riddle: '🧩',
-      detective: '🕵️',
-      cartoon: '🎨',
-      jigsaw: '🧩',
-    };
-    return icons[type] || '❓';
-  };
+  useEffect(() => {
+    loadLevels();
+  }, [currentPage]);
 
   const getDifficultyColor = (difficulty: number): string => {
     const colors: Record<number, string> = {
-      1: 'border-green-500 bg-green-50',
-      2: 'border-blue-500 bg-blue-50',
-      3: 'border-orange-500 bg-orange-50',
-      4: 'border-red-500 bg-red-50',
-      5: 'border-purple-500 bg-purple-50',
+      1: 'border-green-500',
+      2: 'border-blue-500',
+      3: 'border-orange-500',
+      4: 'border-red-500',
+      5: 'border-purple-500',
     };
-    return colors[difficulty] || 'border-gray-500 bg-gray-50';
+    return colors[difficulty] || 'border-gray-500';
   };
 
   const getDifficultyText = (difficulty: number): string => {
@@ -85,47 +102,77 @@ export default function LevelsPage() {
     return texts[difficulty] || 'Unknown';
   };
 
+  const totalPages = Math.ceil(3000 / levelsPerPage);
+
   return (
-    <div className={`min-h-screen bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 p-4 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="max-w-6xl mx-auto">
+    <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
+      <FloatingIcons />
+      
+      {/* Stats Cards Bar - Like play page */}
+      <div className="p-4 bg-gray-800 border-b border-gray-700">
+        <div className="max-w-6xl mx-auto grid grid-cols-3 gap-3">
+          <div className="bg-gray-700 rounded-xl p-3 border-l-4 border-blue-500">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl">💰</div>
+              <div>
+                <div className="text-xs text-gray-400">{language === 'ar' ? 'رصيد' : 'Balance'}</div>
+                <div className="text-lg font-bold text-white">{stats.sbrBalance.toFixed(1)}</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-700 rounded-xl p-3 border-l-4 border-yellow-500">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl">🎯</div>
+              <div>
+                <div className="text-xs text-gray-400">{language === 'ar' ? 'المستوى' : 'Level'}</div>
+                <div className="text-lg font-bold text-white">{stats.currentLevel}/3000</div>
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-700 rounded-xl p-3 border-l-4 border-green-500">
+            <div className="flex items-center space-x-2">
+              <div className="text-2xl">✅</div>
+              <div>
+                <div className="text-xs text-gray-400">{language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+                <div className="text-lg font-bold text-white">{stats.levelsCompleted}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto p-4">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 mb-6">
+        <div className="bg-gray-800 rounded-2xl shadow-xl p-6 mb-4 border border-gray-700">
           <div className="flex justify-between items-center mb-4">
-            <h1 className="text-4xl font-bold text-gray-800">
+            <h1 className="text-3xl font-bold text-white">
               {language === 'ar' ? '🎮 جميع المستويات' : '🎮 All Levels'}
             </h1>
-            <Link href="/play" className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-6 rounded-lg">
+            <Link href="/play" className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-xl transition">
               {language === 'ar' ? '▶️ العب' : '▶️ Play'}
             </Link>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl p-4 text-white text-center">
-              <div className="text-3xl mb-2">💰</div>
-              <div className="text-2xl font-bold">{stats.sbrBalance.toFixed(1)}</div>
-              <div className="text-sm opacity-90">{language === 'ar' ? 'SBR' : 'Balance'}</div>
+          {/* Progress Bar */}
+          <div className="mt-4">
+            <div className="flex justify-between mb-2">
+              <span className="text-gray-300 font-semibold">{language === 'ar' ? 'التقدم' : 'Progress'}</span>
+              <span className="text-gray-300 font-bold">{stats.progressPercentage}%</span>
             </div>
-            <div className="bg-gradient-to-br from-blue-400 to-cyan-600 rounded-xl p-4 text-white text-center">
-              <div className="text-3xl mb-2">✅</div>
-              <div className="text-2xl font-bold">{stats.levelsCompleted}</div>
-              <div className="text-sm opacity-90">{language === 'ar' ? 'مكتمل' : 'Completed'}</div>
+            <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+              <div
+                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full transition-all duration-500"
+                style={{ width: `${stats.progressPercentage}%` }}
+              />
             </div>
-            <div className="bg-gradient-to-br from-purple-400 to-pink-600 rounded-xl p-4 text-white text-center">
-              <div className="text-3xl mb-2">🎯</div>
-              <div className="text-2xl font-bold">{stats.progressPercentage}%</div>
-              <div className="text-sm opacity-90">{language === 'ar' ? 'التقدم' : 'Progress'}</div>
-            </div>
-            <div className="bg-gradient-to-br from-orange-400 to-red-600 rounded-xl p-4 text-white text-center">
-              <div className="text-3xl mb-2">⚡</div>
-              <div className="text-2xl font-bold">{stats.averageAttempts}</div>
-              <div className="text-sm opacity-90">{language === 'ar' ? 'متوسط محاولات' : 'Avg Attempts'}</div>
-            </div>
+            <p className="text-center text-gray-400 mt-2 text-sm">
+              {stats.levelsCompleted} / 3000 {language === 'ar' ? 'مستويات مكتملة' : 'levels completed'}
+            </p>
           </div>
         </div>
 
         {/* Levels Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
           {levels.map((level) => (
             <Link
               key={level.level_number}
@@ -135,49 +182,55 @@ export default function LevelsPage() {
                   e.preventDefault();
                   alert(language === 'ar' ? 'المستوى غير مقفول بعد!' : 'Level not unlocked yet!');
                 } else {
-                  // Set current level in engine
-                  gameEngine.getState().currentLevel = level.level_number;
-                  localStorage.setItem('bit3k_game_state', JSON.stringify(gameEngine.getState()));
+                  const state = gameEngine.getState();
+                  state.currentLevel = level.level_number;
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('bit3k_game_state', JSON.stringify(state));
+                  }
                 }
               }}
             >
               <div
-                className={`relative bg-white rounded-2xl shadow-lg p-6 transition transform hover:scale-105 cursor-pointer ${
-                  level.completed ? 'border-4 border-green-500' : 
-                  level.unlocked ? 'border-4 border-blue-500' : 
-                  'border-4 border-gray-300 opacity-60'
+                className={`relative bg-gray-800 rounded-2xl shadow-xl p-6 transition transform hover:scale-105 cursor-pointer border-2 ${
+                  level.completed ? 'border-green-500' : 
+                  level.unlocked ? 'border-blue-500' : 
+                  'border-gray-600 opacity-60'
                 }`}
               >
                 {/* Badge */}
                 {level.completed && (
-                  <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
+                  <div className="absolute top-2 right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-sm font-bold">
                     ✓
                   </div>
                 )}
 
-                {/* Level Number */}
-                <div className={`text-6xl mb-2 ${level.unlocked ? '' : 'grayscale'}`}>
-                  {getTypeIcon(level.level_type)}
+                {/* Level Icon */}
+                <div className="mb-3 flex justify-center">
+                  <LevelIcon 
+                    type={level.level_type as any} 
+                    size="lg" 
+                    animated={level.unlocked}
+                  />
                 </div>
 
                 {/* Level Info */}
-                <div className="mb-3">
-                  <div className="text-sm text-gray-500 mb-1">
+                <div className="mb-3 text-center">
+                  <div className="text-sm text-gray-400 mb-1">
                     {language === 'ar' ? 'المستوى' : 'Level'} {level.level_number}
                   </div>
-                  <h3 className="text-xl font-bold text-gray-800">
+                  <h3 className="text-lg font-bold text-white">
                     {level.title}
                   </h3>
                 </div>
 
                 {/* Difficulty & Reward */}
-                <div className={`border-l-4 rounded p-3 ${getDifficultyColor(level.difficulty)}`}>
+                <div className={`border-l-4 rounded-lg p-3 bg-gray-700 ${getDifficultyColor(level.difficulty)}`}>
                   <div className="flex justify-between items-center">
-                    <span className="font-semibold text-gray-700">
+                    <span className="font-semibold text-white text-sm">
                       {getDifficultyText(level.difficulty)}
                     </span>
-                    <span className="font-bold text-gray-800">
-                      💰 {level.sbr_reward} SBR
+                    <span className="font-bold text-yellow-400">
+                      💰 {level.sbr_reward}
                     </span>
                   </div>
                 </div>
@@ -189,8 +242,13 @@ export default function LevelsPage() {
                   </div>
                 )}
                 {level.unlocked && !level.completed && (
-                  <div className="mt-3 text-center text-sm text-blue-600 font-semibold">
+                  <div className="mt-3 text-center text-sm text-blue-400 font-semibold">
                     ▶️ {language === 'ar' ? 'العب' : 'Play'}
+                  </div>
+                )}
+                {level.completed && (
+                  <div className="mt-3 text-center text-sm text-green-400 font-semibold">
+                    ✅ {language === 'ar' ? 'مكتمل' : 'Completed'}
                   </div>
                 )}
               </div>
@@ -198,25 +256,30 @@ export default function LevelsPage() {
           ))}
         </div>
 
-        {/* Progress Bar */}
-        <div className="bg-white rounded-2xl shadow-2xl p-6 mt-6">
-          <h3 className="text-xl font-bold mb-4 text-gray-800">
-            {language === 'ar' ? '📊 إجمالي التقدم' : '📊 Overall Progress'}
-          </h3>
-          <div className="w-full bg-gray-200 rounded-full h-8 overflow-hidden">
-            <div
-              className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full transition-all duration-500 flex items-center justify-center text-white font-bold"
-              style={{ width: `${stats.progressPercentage}%` }}
-            >
-              {stats.progressPercentage}%
-            </div>
-          </div>
-          <p className="text-center text-gray-600 mt-2">
-            {stats.levelsCompleted} / {stats.totalEmbeddedLevels} {language === 'ar' ? 'مستويات مكتملة' : 'levels completed'}
-          </p>
+        {/* Pagination */}
+        <div className="flex justify-center items-center gap-2 mb-20">
+          <button
+            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+            disabled={currentPage === 1}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition"
+          >
+            {language === 'ar' ? '← السابق' : '← Previous'}
+          </button>
+          <span className="text-gray-300">
+            {language === 'ar' ? 'صفحة' : 'Page'} {currentPage} / {totalPages}
+          </span>
+          <button
+            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+            disabled={currentPage === totalPages}
+            className="px-4 py-2 bg-gray-800 hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg transition"
+          >
+            {language === 'ar' ? 'التالي →' : 'Next →'}
+          </button>
         </div>
       </div>
+
+      {/* Navigation Bar */}
+      <NavigationBar language={language} />
     </div>
   );
 }
-
