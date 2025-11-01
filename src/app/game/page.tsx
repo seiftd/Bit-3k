@@ -82,10 +82,17 @@ function GameContent() {
       if (user) {
         setLanguage((user.language_code || 'en').startsWith('ar') ? 'ar' : 'en');
       }
+      
+      // Redirect to standalone game if no API available
+      // First try API, if fails, redirect to /play
+      authenticateAndLoadLevel().catch(() => {
+        // If API fails, redirect to standalone game
+        window.location.href = '/play';
+      });
+    } else {
+      // Not in Telegram, redirect to standalone game
+      window.location.href = '/play';
     }
-
-    // Authenticate and get current level
-    authenticateAndLoadLevel();
   }, []);
 
   const authenticateAndLoadLevel = async () => {
