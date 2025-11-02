@@ -182,29 +182,6 @@ export default function DashboardPage() {
     }
   };
 
-  const claimMission = (missionKey: string) => {
-    const mission = dailyMissions[missionKey as keyof typeof dailyMissions];
-    if (!mission.completed) {
-      alert(t('missionLogin') + ' ' + t('completed'));
-      return;
-    }
-    
-    // Award SBR
-    if (typeof window !== 'undefined') {
-      const newStats = gameEngine.getStats();
-      newStats.sbrBalance += mission.reward;
-      newStats.totalEarned += mission.reward;
-      
-      // Mark as claimed
-      setDailyMissions(prev => ({
-        ...prev,
-        [missionKey]: { ...prev[missionKey as keyof typeof prev], completed: false },
-      }));
-      
-      alert(`${t('claim')} +${mission.reward} SBR!`);
-      loadStats();
-    }
-  };
 
   const userName = telegramUser?.username 
     ? `@${telegramUser.username}` 
