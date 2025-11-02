@@ -75,9 +75,10 @@ function AdPageContent() {
       });
     };
 
+    // Generate token if not provided (for standalone mode)
     if (!adToken) {
-      setError('Invalid ad token');
-      return;
+      const generatedToken = 'auto-' + Date.now();
+      // Continue without error - allow ad to play anyway
     }
 
     // Show monetization ad
@@ -187,7 +188,7 @@ function AdPageContent() {
             'Authorization': `Bearer ${token}`,
           },
           body: JSON.stringify({
-            ad_token: adToken,
+            ad_token: adTokenState || 'auto-' + Date.now(),
             watch_duration: 15,
           }),
         });
