@@ -129,93 +129,91 @@ function AdPageContent() {
   }, [adToken]);
 
   const completeAd = useCallback(async () => {
-    if (!adToken || !canClose || loading || completed) return;
+    if (!canClose || loading || completed) return;
 
     setLoading(true);
     setError(null);
 
+    // Try to complete via API if Telegram available, otherwise just redirect
     try {
-      // Get user data from Telegram WebApp
       const telegramWebApp = (window as any).Telegram?.WebApp;
       const initData = telegramWebApp?.initData;
 
-      if (!initData) {
-        throw new Error('Telegram WebApp data not available');
-      }
+      // Only try API if Telegram WebApp is available
+      if (initData) {
+        try {
+          // Parse init data to get user info
+          const params = new URLSearchParams(initData);
+          const userStr = params.get('user');
+          
+          if (userStr) {
+            const user = JSON.parse(userStr);
 
-      // Parse init data to get user info
-      const params = new URLSearchParams(initData);
-      const userStr = params.get('user');
-      
-      if (!userStr) {
-        throw new Error('User data not found');
-      }
+            // Try to authenticate (non-blocking)
+            try {
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+              const authResponse = await fetch(`${apiUrl}/auth/telegram`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  telegram_id: user.id,
+                  username: user.username,
+                  first_name: user.first_name,
+                  last_name: user.last_name,
+                  language_code: user.language_code || 'en',
+                }),
+              });
 
-      const user = JSON.parse(userStr);
+              if (authResponse.ok) {
+                const authData = await authResponse.json();
+                const token = authData.access_token;
 
-      // First, authenticate
-      const authResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/telegram`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          telegram_id: user.id,
-          username: user.username,
-          first_name: user.first_name,
-          last_name: user.last_name,
-          language_code: user.language_code || 'en',
-        }),
-      });
-
-      if (!authResponse.ok) {
-        throw new Error('Authentication failed');
-      }
-
-      const authData = await authResponse.json();
-      const token = authData.access_token;
-
-              // Try to complete the ad via API (optional)
-              try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
-                await fetch(`${apiUrl}/ads/completed`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                  },
-                  body: JSON.stringify({
-                    ad_token: adToken,
-                    watch_duration: 15,
-                  }),
-                });
-              } catch (apiError) {
-                // API call failed, but ad was watched - continue anyway
-                console.warn('API error (continuing anyway):', apiError);
+                // Try to complete the ad via API (optional)
+                try {
+                  await fetch(`${apiUrl}/ads/completed`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({
+                      ad_token: adToken,
+                      watch_duration: 15,
+                    }),
+                  });
+                } catch (apiError) {
+                  // API call failed, but ad was watched - continue anyway
+                  console.warn('API error (continuing anyway):', apiError);
+                }
               }
+            } catch (authError) {
+              // Auth failed, but continue anyway
+              console.warn('Auth error (continuing anyway):', authError);
             }
-          } catch (authError) {
-            // Auth failed, but continue anyway
-            console.warn('Auth error (continuing anyway):', authError);
           }
+        } catch (parseError) {
+          // Parse error, but continue anyway
+          console.warn('Parse error (continuing anyway):', parseError);
         }
       }
-
-      setCompleted(true);
-
-      // Redirect back to game
-      const redirect = searchParams.get('redirect') || '/play';
-      setTimeout(() => {
-        if (typeof window !== 'undefined') {
-          window.location.href = redirect;
-        }
-      }, 1500);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
-    } finally {
-      setLoading(false);
+      // Any error, but continue anyway - ad was watched
+      console.warn('Error (continuing anyway):', err);
     }
-  }, [adToken, canClose, loading, completed]);
+
+    // Always complete and redirect (ad was watched)
+    setCompleted(true);
+    const redirect = searchParams.get('redirect') || '/play';
+    setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        window.location.href = redirect;
+      }
+    }, 1500);
+
+    setLoading(false);
+  }, [adToken, canClose, loading, completed, searchParams]);
 
   if (error) {
     return (
