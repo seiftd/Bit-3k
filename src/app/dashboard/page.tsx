@@ -45,6 +45,12 @@ export default function DashboardPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [binanceId, setBinanceId] = useState('');
   const [processing, setProcessing] = useState(false);
+  
+  // Daily Missions
+  const [dailyMissions, setDailyMissions] = useState({
+    login: { completed: false, reward: 5 },
+    subscribe: { completed: false, reward: 10 },
+  });
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -111,9 +117,7 @@ export default function DashboardPage() {
         level2Referrals: 'Level 2 Referrals',
         dailyMissions: 'Daily Missions',
         missionLogin: 'Daily Login',
-        missionPlay: 'Play 3 Levels',
-        missionAd: 'Watch Ad',
-        missionReferral: 'Invite Friend',
+        missionSubscribe: 'Subscribe to Telegram Channel',
         completed: 'Completed',
         claim: 'Claim',
         copyCode: 'Copy Code',
@@ -149,9 +153,7 @@ export default function DashboardPage() {
         level2Referrals: 'إحالات المستوى 2',
         dailyMissions: 'المهام اليومية',
         missionLogin: 'تسجيل دخول يومي',
-        missionPlay: 'العب 3 مستويات',
-        missionAd: 'شاهد إعلان',
-        missionReferral: 'دعوة صديق',
+        missionSubscribe: 'الاشتراك في قناة التليجرام',
         completed: 'مكتمل',
         claim: 'استلم',
         copyCode: 'نسخ الكود',
@@ -181,6 +183,79 @@ export default function DashboardPage() {
       alert(t('copied'));
     }
   };
+
+  const shareReferralLink = () => {
+    if (typeof window === 'undefined') return;
+    const linkToShare = referralLink || getReferralLink();
+    const message = language === 'ar' 
+      ? `انضم إلى Bit 3K - لعبة الألغاز! 🎮\n${linkToShare}`
+      : `Join Bit 3K - Puzzle Game! 🎮\n${linkToShare}`;
+    
+    // Try Web Share API first
+    if (navigator.share) {
+      navigator.share({
+        title: 'Bit 3K',
+        text: message,
+        url: linkToShare,
+      }).catch(() => {
+        // Fallback to copy
+        copyReferralLink();
+      });
+    } else {
+      // Fallback: try Telegram WebApp share or copy
+      const tg = (window as any).Telegram?.WebApp;
+      if (tg && tg.openLink) {
+        const telegramShareUrl = `https://t.me/share/url?url=${encodeURIComponent(linkToShare)}&text=${encodeURIComponent(message)}`;
+        tg.openLink(telegramShareUrl);
+      } else {
+        copyReferralLink();
+      }
+    }
+  };
+
+  const claimMission = (missionKey: string) => {
+    const mission = dailyMissions[missionKey as keyof typeof dailyMissions];
+    if (!mission.completed) {
+      alert(language === 'ar' ? 'المهمة غير مكتملة' : 'Mission not completed');
+      return;
+    }
+    
+    // Award SBR
+    if (typeof window !== 'undefined') {
+      const newStats = gameEngine.getStats();
+      newStats.sbrBalance += mission.reward;
+      newStats.totalEarned += mission.reward;
+      
+      // Mark as claimed
+      setDailyMissions(prev => ({
+        ...prev,
+        [missionKey]: { ...prev[missionKey as keyof typeof prev], completed: false },
+      }));
+      
+      alert(language === 'ar' ? `تم الحصول على ${mission.reward} نقطة!` : `Earned ${mission.reward} SBR!`);
+      loadStats();
+    }
+  };
+
+  useEffect(() => {
+    // Check daily missions
+    if (typeof window !== 'undefined') {
+      // Check login mission (always true if user is here)
+      const today = new Date().toDateString();
+      const lastLogin = localStorage.getItem('lastLogin');
+      if (lastLogin !== today) {
+        setDailyMissions(prev => ({
+          ...prev,
+          login: { completed: true, reward: 5 },
+        }));
+        localStorage.setItem('lastLogin', today);
+      }
+
+      // Check subscribe mission (check if user is subscribed to channel)
+      // TODO: Check Telegram channel subscription via API
+      // For now, allow manual completion
+    }
+  }, []);
 
 
   const userName = telegramUser?.username 
@@ -276,37 +351,34 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Balance Card */}
+            {/* Daily Missions */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-              <h2 className="text-2xl font-bold mb-4 text-white">{t('stats')}</h2>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-gray-700 rounded-xl p-4 border-l-4 border-blue-500">
-                  <div className="text-3xl mb-2">💰</div>
-                  <div className="text-sm text-gray-400 mb-1">{t('balance')}</div>
-                  <div className="text-2xl font-bold text-white">{stats.sbrBalance.toFixed(1)} SBR</div>
-                </div>
-                <div className="bg-gray-700 rounded-xl p-4 border-l-4 border-green-500">
-                  <div className="text-3xl mb-2">📈</div>
-                  <div className="text-sm text-gray-400 mb-1">{t('totalEarned')}</div>
-                  <div className="text-2xl font-bold text-white">{stats.totalEarned.toFixed(1)} SBR</div>
-                </div>
-              </div>
-              
-              {/* Progress Bar */}
-              <div className="mt-6">
-                <div className="flex justify-between mb-2">
-                  <span className="text-gray-300 font-semibold">{t('progress')}</span>
-                  <span className="text-gray-300 font-bold">{stats.progressPercentage}%</span>
-                </div>
-                <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 h-full transition-all duration-500"
-                    style={{ width: `${stats.progressPercentage}%` }}
-                  />
-                </div>
-                <p className="text-sm text-gray-400 mt-2 text-center">
-                  {stats.levelsCompleted} / 3200 {language === 'ar' ? 'مستويات' : 'levels'}
-                </p>
+              <h2 className="text-2xl font-bold mb-4 text-white">🎯 {t('dailyMissions')}</h2>
+              <div className="space-y-3">
+                {Object.entries(dailyMissions).map(([key, mission]) => (
+                  <div key={key} className="flex items-center justify-between bg-gray-700 rounded-xl p-4">
+                    <div className="flex items-center space-x-3">
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${mission.completed ? 'bg-green-500' : 'bg-gray-600'}`}>
+                        {mission.completed ? '✓' : ''}
+                      </div>
+                      <div>
+                        <div className="font-semibold text-white">{t(`mission${key.charAt(0).toUpperCase() + key.slice(1)}`)}</div>
+                        <div className="text-sm text-gray-400">+{mission.reward} SBR</div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => claimMission(key)}
+                      disabled={!mission.completed}
+                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                        mission.completed
+                          ? 'bg-green-500 hover:bg-green-600 text-white'
+                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {mission.completed ? (language === 'ar' ? 'مطالبة' : 'Claim') : (language === 'ar' ? 'غير مكتمل' : 'Incomplete')}
+                    </button>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -432,20 +504,29 @@ export default function DashboardPage() {
                   />
                 </div>
                 <div className="text-sm text-gray-400 mb-2">🔗 {language === 'ar' ? 'رابط الدعوة' : 'Referral Link'}</div>
-                <div className="flex items-center space-x-2">
+                <div className="mb-3">
                   <input
                     type="text"
                     value={referralLink || getReferralLink()}
                     readOnly
-                    className="flex-1 px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg font-mono text-sm text-blue-400 break-all"
+                    className="w-full px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg font-mono text-sm text-blue-400 break-all mb-2"
                   />
-                  <button
-                    onClick={copyReferralLink}
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
-                    title={language === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
-                  >
-                    📋
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={copyReferralLink}
+                      className="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                      title={language === 'ar' ? 'نسخ الرابط' : 'Copy Link'}
+                    >
+                      📋 {language === 'ar' ? 'نسخ' : 'Copy'}
+                    </button>
+                    <button
+                      onClick={shareReferralLink}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-semibold transition text-sm"
+                      title={language === 'ar' ? 'مشاركة الرابط' : 'Share Link'}
+                    >
+                      🔗 {language === 'ar' ? 'مشاركة' : 'Share'}
+                    </button>
+                  </div>
                 </div>
                 <div className="mt-3 text-xs text-gray-500 text-center">
                   {language === 'ar' ? 'شارك هذا الرابط مع أصدقائك!' : 'Share this link with your friends!'}

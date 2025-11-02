@@ -1,0 +1,5 @@
+[33m85dc876[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m fix: Remove unused claimMission function
+[33m4bd1c7b[m feat: Complete shop implementation and update all level references to 3200
+[33mf9ad5bb[m feat: Remove missions, add shop (Ooredoo recharge & USDT), increase levels to 3200
+[33m45043c3[m fix: Correct try-catch syntax error in ad page - fix nested blocks
+[33m8d4c129[m fix: Generate ad token automatically to prevent Invalid ad token error
