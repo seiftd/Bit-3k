@@ -191,7 +191,7 @@ export class GameEngine {
     };
   }
 
-  // Get current level (supports up to 3000 levels)
+  // Get current level (supports up to 3200 levels)
   getCurrentLevel(): GameLevel | null {
     // Try embedded levels first (for levels 1-50)
     if (this.state.currentLevel <= 50) {
@@ -202,8 +202,8 @@ export class GameEngine {
       }
     }
     
-    // Generate level dynamically for all levels (1-3000)
-    if (this.state.currentLevel >= 1 && this.state.currentLevel <= 3000) {
+    // Generate level dynamically for all levels (1-3200)
+    if (this.state.currentLevel >= 1 && this.state.currentLevel <= 3200) {
       const generated = generateLevel(this.state.currentLevel);
       // Ensure options are present (generateLevel always returns GameLevel, but TypeScript needs this check)
       if (generated) {
@@ -362,7 +362,7 @@ export class GameEngine {
 
   // Get statistics
   getStats() {
-    const totalLevels = 3000; // Total levels supported
+    const totalLevels = 3200; // Total levels supported
     return {
       ...this.state,
       totalEmbeddedLevels: totalLevels,

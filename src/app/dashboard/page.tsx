@@ -31,7 +31,7 @@ export default function DashboardPage() {
     attempts: {},
     completedLevels: [],
     lastPlayedAt: new Date(),
-    totalEmbeddedLevels: 3000,
+    totalEmbeddedLevels: 3200,
     progressPercentage: 0,
     averageAttempts: 0,
   });
@@ -41,12 +41,10 @@ export default function DashboardPage() {
   const [referrals, setReferrals] = useState({ total: 0, level1: 0, level2: 0 });
   const [referralCode, setReferralCode] = useState('BIT3K123');
   const [referralLink, setReferralLink] = useState('');
-  const [dailyMissions, setDailyMissions] = useState({
-    login: { completed: false, reward: 5 },
-    play: { completed: false, reward: 3 },
-    ad: { completed: false, reward: 2 },
-    referral: { completed: false, reward: 10 },
-  });
+  // Shop states
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [binanceId, setBinanceId] = useState('');
+  const [processing, setProcessing] = useState(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -237,7 +235,7 @@ export default function DashboardPage() {
               <div className="text-2xl">🎯</div>
               <div>
                 <div className="text-xs text-gray-400">{t('currentLevel')}</div>
-                <div className="text-lg font-bold text-white">{stats.currentLevel}/3000</div>
+                <div className="text-lg font-bold text-white">{stats.currentLevel}/3200</div>
               </div>
             </div>
           </div>
