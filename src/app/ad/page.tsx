@@ -12,7 +12,10 @@ declare global {
 
 function AdPageContent() {
   const searchParams = useSearchParams();
-  const adToken = searchParams.get('token');
+  // Generate token automatically if not provided
+  const [adToken] = useState(() => {
+    return searchParams.get('token') || 'auto-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  });
   const [timeLeft, setTimeLeft] = useState(15);
   const [canClose, setCanClose] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -75,13 +78,7 @@ function AdPageContent() {
       });
     };
 
-    // Generate token if not provided (for standalone mode)
-    if (!adToken) {
-      const generatedToken = 'auto-' + Date.now();
-      // Continue without error - allow ad to play anyway
-    }
-
-    // Show monetization ad
+    // Show monetization ad (token is always available)
     const showAd = async () => {
       try {
         // Load script first
@@ -178,28 +175,30 @@ function AdPageContent() {
       const authData = await authResponse.json();
       const token = authData.access_token;
 
-      // Try to complete the ad via API (optional, skip if API not available)
-      try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
-        const response = await fetch(`${apiUrl}/ads/completed`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
-          },
-          body: JSON.stringify({
-            ad_token: adTokenState || 'auto-' + Date.now(),
-            watch_duration: 15,
-          }),
-        });
-
-        if (!response.ok) {
-          // Log but don't fail - ad was watched
-          console.warn('Failed to register ad completion with API, but ad was watched');
+              // Try to complete the ad via API (optional)
+              try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+                await fetch(`${apiUrl}/ads/completed`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                  },
+                  body: JSON.stringify({
+                    ad_token: adToken,
+                    watch_duration: 15,
+                  }),
+                });
+              } catch (apiError) {
+                // API call failed, but ad was watched - continue anyway
+                console.warn('API error (continuing anyway):', apiError);
+              }
+            }
+          } catch (authError) {
+            // Auth failed, but continue anyway
+            console.warn('Auth error (continuing anyway):', authError);
+          }
         }
-      } catch (apiError) {
-        // API call failed, but ad was watched - continue anyway
-        console.warn('API error (continuing anyway):', apiError);
       }
 
       setCompleted(true);
