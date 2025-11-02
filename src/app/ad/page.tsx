@@ -206,9 +206,13 @@ function AdPageContent() {
     // Always complete and redirect (ad was watched)
     setCompleted(true);
     const redirect = searchParams.get('redirect') || '/play';
+    // Add adCompleted parameter to indicate ad was watched
+    const redirectUrl = redirect.includes('?') 
+      ? `${redirect}&adCompleted=true&adToken=${adToken}`
+      : `${redirect}?adCompleted=true&adToken=${adToken}`;
     setTimeout(() => {
       if (typeof window !== 'undefined') {
-        window.location.href = redirect;
+        window.location.href = redirectUrl;
       }
     }, 1500);
 

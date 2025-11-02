@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { gameEngine, GameEngine } from '@/lib/game-engine';
 import { GameLevel } from '@/data/levels';
 import Link from 'next/link';
@@ -14,6 +15,7 @@ import { getLanguage, getLanguageDirection } from '@/lib/language';
 import { initializeTelegramWebApp } from '@/lib/telegram';
 
 function PlayContent() {
+  const searchParams = useSearchParams();
   const [level, setLevel] = useState<GameLevel | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
@@ -45,9 +47,34 @@ function PlayContent() {
       setLanguage(currentLang);
     }
 
-    // Load current level
+    // Check if ad was completed (coming back from ad page)
+    const adCompleted = searchParams?.get('adCompleted');
+    if (adCompleted === 'true') {
+      // Ad was watched, move to next level immediately
+      const nextLevel = engine.nextLevel();
+      if (nextLevel) {
+        // Ensure options are present
+        const levelWithOptions = nextLevel.options && nextLevel.options.length > 0 
+          ? nextLevel 
+          : engine.getCurrentLevel();
+        
+        if (levelWithOptions) {
+          setLevel(levelWithOptions);
+          setSelectedAnswer(null);
+          setResult(null);
+          setShowHint(false);
+          setStats(engine.getStats());
+          setLoading(false);
+          // Clear the URL parameter to avoid repeating on refresh
+          window.history.replaceState({}, '', window.location.pathname);
+          return;
+        }
+      }
+    }
+
+    // Normal load
     loadLevel();
-  }, []);
+  }, [searchParams]);
 
   const loadLevel = () => {
     if (typeof window === 'undefined') return;
@@ -419,10 +446,7 @@ export default function PlayPage() {
   return (
     <Suspense fallback={
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-4xl mb-4 animate-spin">⏳</div>
-          <p className="text-white">Loading game...</p>
-        </div>
+        <div className="text-white text-xl">Loading...</div>
       </div>
     }>
       <PlayContent />
