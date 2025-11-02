@@ -85,13 +85,18 @@ function GameContent() {
       
       // Redirect to standalone game if no API available
       // First try API, if fails, redirect to /play
-      authenticateAndLoadLevel().catch(() => {
+      authenticateAndLoadLevel().catch((err) => {
+        console.error('API connection failed, redirecting to standalone game:', err);
         // If API fails, redirect to standalone game
-        window.location.href = '/play';
+        setTimeout(() => {
+          window.location.href = '/play';
+        }, 1000);
       });
     } else {
-      // Not in Telegram, redirect to standalone game
-      window.location.href = '/play';
+      // Not in Telegram, redirect to standalone game immediately
+      setTimeout(() => {
+        window.location.href = '/play';
+      }, 500);
     }
   }, []);
 
@@ -158,6 +163,11 @@ function GameContent() {
       if (!response.ok) {
         const errorText = await response.text();
         console.error('Load level error:', errorText);
+        // If 404 or API error, redirect to standalone game
+        if (response.status === 404 || response.status >= 500) {
+          window.location.href = '/play';
+          return;
+        }
         throw new Error(`Failed to load level: ${response.status} - ${errorText}`);
       }
 
