@@ -237,6 +237,81 @@ export default function DashboardPage() {
     }
   };
 
+  // Shop functions
+  const handleOoredooRecharge = async () => {
+    if (!phoneNumber || phoneNumber.length < 8) {
+      alert(language === 'ar' ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+      return;
+    }
+
+    if (stats.sbrBalance < 500) {
+      alert(language === 'ar' ? 'رصيدك غير كافٍ! تحتاج 500 نقطة' : 'Insufficient balance! You need 500 points');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // TODO: Send to API
+      // For now, simulate the transaction
+      if (typeof window !== 'undefined') {
+        const newStats = gameEngine.getStats();
+        newStats.sbrBalance -= 500;
+        newStats.totalEarned -= 500;
+        
+        // TODO: Call API to process Ooredoo recharge
+        // await fetch(`${apiUrl}/shop/ooredoo`, { ... });
+        
+        alert(language === 'ar' 
+          ? `تم طلب شحن أوريدو بنجاح! سيتم شحن 10,000 دينار لرقم ${phoneNumber}` 
+          : `Ooredoo recharge requested! 10,000 IQD will be charged to ${phoneNumber}`);
+        
+        setPhoneNumber('');
+        loadStats();
+      }
+    } catch (error) {
+      alert(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleUSDTExchange = async () => {
+    if (!binanceId || binanceId.length < 5) {
+      alert(language === 'ar' ? 'يرجى إدخال Binance ID صحيح' : 'Please enter a valid Binance ID');
+      return;
+    }
+
+    if (stats.sbrBalance < 1000) {
+      alert(language === 'ar' ? 'رصيدك غير كافٍ! تحتاج 1000 نقطة' : 'Insufficient balance! You need 1000 points');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // TODO: Send to API
+      // For now, simulate the transaction
+      if (typeof window !== 'undefined') {
+        const newStats = gameEngine.getStats();
+        newStats.sbrBalance -= 1000;
+        newStats.totalEarned -= 1000;
+        
+        // TODO: Call API to process USDT exchange
+        // await fetch(`${apiUrl}/shop/usdt`, { ... });
+        
+        alert(language === 'ar' 
+          ? `تم طلب تحويل USDT بنجاح! سيتم تحويل 2$ إلى Binance ID: ${binanceId}` 
+          : `USDT exchange requested! 2$ will be transferred to Binance ID: ${binanceId}`);
+        
+        setBinanceId('');
+        loadStats();
+      }
+    } catch (error) {
+      alert(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
   useEffect(() => {
     // Check daily missions
     if (typeof window !== 'undefined') {
