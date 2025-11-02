@@ -43,6 +43,7 @@ export default function DashboardPage() {
   const [referralLink, setReferralLink] = useState('');
   // Shop states
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [mobilisPhone, setMobilisPhone] = useState('');
   const [binanceId, setBinanceId] = useState('');
   const [processing, setProcessing] = useState(false);
   
@@ -266,6 +267,43 @@ export default function DashboardPage() {
           : `Ooredoo recharge requested! 10,000 IQD will be charged to ${phoneNumber}`);
         
         setPhoneNumber('');
+        loadStats();
+      }
+    } catch (error) {
+      alert(language === 'ar' ? 'حدث خطأ' : 'An error occurred');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleMobilisRecharge = async () => {
+    if (!mobilisPhone || mobilisPhone.length < 8) {
+      alert(language === 'ar' ? 'يرجى إدخال رقم هاتف صحيح' : 'Please enter a valid phone number');
+      return;
+    }
+
+    if (stats.sbrBalance < 500) {
+      alert(language === 'ar' ? 'رصيدك غير كافٍ! تحتاج 500 نقطة' : 'Insufficient balance! You need 500 points');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      // TODO: Send to API
+      // For now, simulate the transaction
+      if (typeof window !== 'undefined') {
+        const newStats = gameEngine.getStats();
+        newStats.sbrBalance -= 500;
+        newStats.totalEarned -= 500;
+        
+        // TODO: Call API to process Mobilis recharge
+        // await fetch(`${apiUrl}/shop/mobilis`, { ... });
+        
+        alert(language === 'ar' 
+          ? `تم طلب شحن موبايليس بنجاح! سيتم شحن 10,000 دينار لرقم ${mobilisPhone}` 
+          : `Mobilis recharge requested! 10,000 IQD will be charged to ${mobilisPhone}`);
+        
+        setMobilisPhone('');
         loadStats();
       }
     } catch (error) {
@@ -500,6 +538,45 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* Mobilis Recharge */}
+              <div className="bg-gray-700 rounded-xl p-4 mb-4 border-l-4 border-purple-500">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">📱 {language === 'ar' ? 'شحن موبايليس' : 'Mobilis Recharge'}</h3>
+                    <p className="text-sm text-gray-400">
+                      {language === 'ar' ? '500 نقطة = 10,000 دينار' : '500 points = 10,000 IQD'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-purple-400">500</div>
+                    <div className="text-xs text-gray-400">SBR</div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <input
+                    type="tel"
+                    value={mobilisPhone}
+                    onChange={(e) => setMobilisPhone(e.target.value)}
+                    placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Enter phone number'}
+                    className="w-full px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-purple-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleMobilisRecharge}
+                    disabled={stats.sbrBalance < 500 || processing || !mobilisPhone}
+                    className={`w-full py-3 px-4 rounded-lg font-bold transition ${
+                      stats.sbrBalance >= 500 && !processing && mobilisPhone
+                        ? 'bg-purple-600 hover:bg-purple-700 text-white'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {processing 
+                      ? (language === 'ar' ? 'جاري المعالجة...' : 'Processing...')
+                      : (language === 'ar' ? 'طلب الشحن' : 'Request Recharge')
+                    }
+                  </button>
+                </div>
+              </div>
+
               {/* USDT Exchange */}
               <div className="bg-gray-700 rounded-xl p-4 border-l-4 border-green-500">
                 <div className="flex items-center justify-between mb-3">
@@ -544,21 +621,44 @@ export default function DashboardPage() {
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
               <h2 className="text-2xl font-bold mb-4 text-white">🏆 {t('leaderboard')}</h2>
               <div className="space-y-2">
-                {gameEngine.getLeaderboard().slice(0, 5).map((entry, index) => (
-                  <div key={entry.rank} className="flex items-center justify-between bg-gray-700 rounded-xl p-3">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
-                        index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-blue-500'
-                      }`}>
-                        {index + 1}
+                {(() => {
+                  const leaderboard = gameEngine.getLeaderboard();
+                  if (leaderboard.length === 0) {
+                    return (
+                      <div className="text-center py-8 text-gray-400">
+                        {language === 'ar' ? 'لا توجد نتائج بعد' : 'No rankings yet'}
                       </div>
-                      <div>
-                        <div className="font-semibold text-white">{entry.name}</div>
-                        <div className="text-sm text-gray-400">{entry.score} SBR</div>
+                    );
+                  }
+                  return leaderboard.slice(0, 5).map((entry, index) => {
+                    const isCurrentUser = telegramUser?.id?.toString() === entry.name.split('@')[1] || 
+                                          (telegramUser?.username && entry.name.includes(telegramUser.username)) ||
+                                          (telegramUser?.first_name && entry.name.includes(telegramUser.first_name));
+                    return (
+                      <div 
+                        key={entry.rank} 
+                        className={`flex items-center justify-between bg-gray-700 rounded-xl p-3 ${
+                          isCurrentUser ? 'ring-2 ring-blue-500' : ''
+                        }`}
+                      >
+                        <div className="flex items-center space-x-3">
+                          <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white ${
+                            index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : index === 2 ? 'bg-orange-600' : 'bg-blue-500'
+                          }`}>
+                            {index + 1}
+                          </div>
+                          <div>
+                            <div className="font-semibold text-white flex items-center gap-2">
+                              {entry.name}
+                              {isCurrentUser && <span className="text-xs text-blue-400">({language === 'ar' ? 'أنت' : 'You'})</span>}
+                            </div>
+                            <div className="text-sm text-gray-400">{entry.score.toLocaleString()} SBR</div>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))}
+                    );
+                  });
+                })()}
               </div>
             </div>
           </div>

@@ -15,7 +15,7 @@ function NavigationContent({ language = 'en' }: NavigationBarProps) {
     { href: '/', icon: '🏠', label: language === 'ar' ? 'الرئيسية' : 'Home' },
     { href: '/play', icon: '🎮', label: language === 'ar' ? 'العب' : 'Play' },
     { href: '/levels', icon: '📋', label: language === 'ar' ? 'المستويات' : 'Levels' },
-    { href: '/dashboard', icon: '📊', label: language === 'ar' ? 'الإحصائيات' : 'Stats' },
+    { href: '/dashboard', icon: '🛒', label: language === 'ar' ? 'المتجر' : 'Shop' },
     { href: '/dashboard', icon: '👤', label: language === 'ar' ? 'الملف' : 'Profile' },
   ];
 

@@ -349,15 +349,94 @@ export class GameEngine {
     this.saveState();
   }
 
-  // Get leaderboard (simulated)
+  // Get leaderboard (from localStorage - real data)
   getLeaderboard(): Array<{ rank: number; name: string; score: number }> {
-    return [
-      { rank: 1, name: 'Top Player', score: 1000 },
-      { rank: 2, name: 'Smart Solver', score: 850 },
-      { rank: 3, name: 'Puzzle Master', score: 720 },
-      { rank: 4, name: 'Level Hunter', score: 600 },
-      { rank: 5, name: 'Riddle King', score: 550 },
-    ];
+    if (typeof window === 'undefined') {
+      return [];
+    }
+
+    // Get all leaderboard entries from localStorage
+    const leaderboardKey = 'bit3k_leaderboard';
+    let leaderboard: Array<{ userId: string; name: string; score: number }> = [];
+    
+    try {
+      const stored = localStorage.getItem(leaderboardKey);
+      if (stored) {
+        leaderboard = JSON.parse(stored);
+      }
+    } catch (e) {
+      console.error('Error loading leaderboard:', e);
+    }
+
+    // Add current user if available
+    const currentUser = this.getCurrentUserData();
+    if (currentUser) {
+      const existingIndex = leaderboard.findIndex(entry => entry.userId === currentUser.id);
+      if (existingIndex >= 0) {
+        // Update existing entry
+        leaderboard[existingIndex] = {
+          userId: currentUser.id,
+          name: currentUser.name,
+          score: this.state.sbrBalance,
+        };
+      } else {
+        // Add new entry
+        leaderboard.push({
+          userId: currentUser.id,
+          name: currentUser.name,
+          score: this.state.sbrBalance,
+        });
+      }
+    }
+
+    // Sort by score (descending) and take top 10
+    leaderboard.sort((a, b) => b.score - a.score);
+    leaderboard = leaderboard.slice(0, 10);
+
+    // Save updated leaderboard
+    try {
+      localStorage.setItem(leaderboardKey, JSON.stringify(leaderboard));
+    } catch (e) {
+      console.error('Error saving leaderboard:', e);
+    }
+
+    // Return formatted leaderboard with ranks
+    return leaderboard.map((entry, index) => ({
+      rank: index + 1,
+      name: entry.name,
+      score: entry.score,
+    }));
+  }
+
+  // Get current user data from Telegram or localStorage
+  private getCurrentUserData(): { id: string; name: string } | null {
+    if (typeof window === 'undefined') return null;
+
+    // Try to get from Telegram WebApp
+    const tg = (window as any).Telegram?.WebApp;
+    if (tg?.initDataUnsafe?.user) {
+      const user = tg.initDataUnsafe.user;
+      return {
+        id: user.id?.toString() || 'unknown',
+        name: user.username ? `@${user.username}` : user.first_name || 'Guest',
+      };
+    }
+
+    // Fallback to localStorage
+    try {
+      const stored = localStorage.getItem('bit3k_user');
+      if (stored) {
+        const user = JSON.parse(stored);
+        return {
+          id: user.id || 'guest',
+          name: user.name || 'Guest',
+        };
+      }
+    } catch (e) {
+      console.error('Error loading user data:', e);
+    }
+
+    return null;
   }
 
   // Get statistics
