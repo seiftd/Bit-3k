@@ -92,11 +92,21 @@ function PlayContent() {
     setResult(null);
     setShowHint(false);
     setSelectedAnswer(null);
+    
+    // Move to next level
     const nextLevel = engine.nextLevel();
     
     if (nextLevel) {
-      setLevel(nextLevel);
-      setSelectedAnswer(null);
+      // Ensure options are present - reload level to generate options if needed
+      const levelWithOptions = nextLevel.options && nextLevel.options.length > 0 
+        ? nextLevel 
+        : engine.getCurrentLevel(); // Force regenerate if no options
+      
+      if (levelWithOptions) {
+        setLevel(levelWithOptions);
+        setSelectedAnswer(null);
+        setStats(engine.getStats());
+      }
     } else {
       // Game completed!
       setLevel(null);

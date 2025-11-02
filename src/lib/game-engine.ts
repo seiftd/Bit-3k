@@ -287,15 +287,16 @@ export class GameEngine {
   nextLevel(): GameLevel | null {
     const nextLevelNum = this.state.currentLevel + 1;
     
-    // Check if level exists
-    if (nextLevelNum > embeddedLevels.length) {
+    // Check if level exists (max 3200 levels)
+    if (nextLevelNum > 3200) {
       return null; // Game completed!
     }
 
     this.state.currentLevel = nextLevelNum;
     this.saveState();
     
-    return embeddedLevels.find(level => level.level_number === nextLevelNum) || null;
+    // Use getCurrentLevel to ensure options are generated
+    return this.getCurrentLevel();
   }
 
   // Skip current level (costs SBR)
