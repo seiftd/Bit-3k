@@ -328,39 +328,91 @@ export default function DashboardPage() {
                   />
                 </div>
                 <p className="text-sm text-gray-400 mt-2 text-center">
-                  {stats.levelsCompleted} / 3000 {language === 'ar' ? 'مستويات' : 'levels'}
+                  {stats.levelsCompleted} / 3200 {language === 'ar' ? 'مستويات' : 'levels'}
                 </p>
               </div>
             </div>
 
-            {/* Daily Missions */}
+            {/* Shop */}
             <div className="bg-gray-800 rounded-2xl shadow-xl p-6 border border-gray-700">
-              <h2 className="text-2xl font-bold mb-4 text-white">🎯 {t('dailyMissions')}</h2>
-              <div className="space-y-3">
-                {Object.entries(dailyMissions).map(([key, mission]) => (
-                  <div key={key} className="flex items-center justify-between bg-gray-700 rounded-xl p-4">
-                    <div className="flex items-center space-x-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center ${mission.completed ? 'bg-green-500' : 'bg-gray-600'}`}>
-                        {mission.completed ? '✓' : ''}
-                      </div>
-                      <div>
-                        <div className="font-semibold text-white">{t(`mission${key.charAt(0).toUpperCase() + key.slice(1)}`)}</div>
-                        <div className="text-sm text-gray-400">+{mission.reward} SBR</div>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => claimMission(key)}
-                      disabled={!mission.completed}
-                      className={`px-4 py-2 rounded-lg font-semibold transition ${
-                        mission.completed
-                          ? 'bg-green-500 hover:bg-green-600 text-white'
-                          : 'bg-gray-600 text-gray-400 cursor-not-allowed'
-                      }`}
-                    >
-                      {mission.completed ? t('claim') : t('completed')}
-                    </button>
+              <h2 className="text-2xl font-bold mb-4 text-white">🛒 {language === 'ar' ? 'المتجر' : 'Shop'}</h2>
+              
+              {/* Ooredoo Recharge */}
+              <div className="bg-gray-700 rounded-xl p-4 mb-4 border-l-4 border-blue-500">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">📱 {language === 'ar' ? 'شحن أوريدو' : 'Ooredoo Recharge'}</h3>
+                    <p className="text-sm text-gray-400">
+                      {language === 'ar' ? '500 نقطة = 10,000 دينار' : '500 points = 10,000 IQD'}
+                    </p>
                   </div>
-                ))}
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-blue-400">500</div>
+                    <div className="text-xs text-gray-400">SBR</div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <input
+                    type="tel"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    placeholder={language === 'ar' ? 'أدخل رقم الهاتف' : 'Enter phone number'}
+                    className="w-full px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleOoredooRecharge}
+                    disabled={stats.sbrBalance < 500 || processing || !phoneNumber}
+                    className={`w-full py-3 px-4 rounded-lg font-bold transition ${
+                      stats.sbrBalance >= 500 && !processing && phoneNumber
+                        ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {processing 
+                      ? (language === 'ar' ? 'جاري المعالجة...' : 'Processing...')
+                      : (language === 'ar' ? 'طلب الشحن' : 'Request Recharge')
+                    }
+                  </button>
+                </div>
+              </div>
+
+              {/* USDT Exchange */}
+              <div className="bg-gray-700 rounded-xl p-4 border-l-4 border-green-500">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <h3 className="text-lg font-bold text-white">💵 {language === 'ar' ? 'تحويل USDT' : 'USDT Exchange'}</h3>
+                    <p className="text-sm text-gray-400">
+                      {language === 'ar' ? '1000 نقطة = 2 دولار' : '1000 points = 2$'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-green-400">1000</div>
+                    <div className="text-xs text-gray-400">SBR</div>
+                  </div>
+                </div>
+                <div className="space-y-3">
+                  <input
+                    type="text"
+                    value={binanceId}
+                    onChange={(e) => setBinanceId(e.target.value)}
+                    placeholder={language === 'ar' ? 'أدخل Binance ID' : 'Enter Binance ID'}
+                    className="w-full px-4 py-2 bg-gray-900 border-2 border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-green-500 focus:outline-none"
+                  />
+                  <button
+                    onClick={handleUSDTExchange}
+                    disabled={stats.sbrBalance < 1000 || processing || !binanceId}
+                    className={`w-full py-3 px-4 rounded-lg font-bold transition ${
+                      stats.sbrBalance >= 1000 && !processing && binanceId
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                    }`}
+                  >
+                    {processing 
+                      ? (language === 'ar' ? 'جاري المعالجة...' : 'Processing...')
+                      : (language === 'ar' ? 'طلب التحويل' : 'Request Exchange')
+                    }
+                  </button>
+                </div>
               </div>
             </div>
 

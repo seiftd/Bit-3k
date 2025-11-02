@@ -32,7 +32,7 @@ export default function LevelsPage() {
     attempts: {} as Record<number, number>,
     completedLevels: [] as number[],
     lastPlayedAt: new Date(),
-    totalEmbeddedLevels: 3000,
+    totalEmbeddedLevels: 3200,
     progressPercentage: 0,
     averageAttempts: 0,
   });
@@ -55,7 +55,7 @@ export default function LevelsPage() {
     
     // Generate levels for current page
     const start = (currentPage - 1) * levelsPerPage + 1;
-    const end = Math.min(start + levelsPerPage - 1, 3000);
+    const end = Math.min(start + levelsPerPage - 1, 3200);
     
     const levelStatuses: LevelWithStatus[] = [];
     for (let i = start; i <= end; i++) {
@@ -102,7 +102,7 @@ export default function LevelsPage() {
     return texts[difficulty] || 'Unknown';
   };
 
-  const totalPages = Math.ceil(3000 / levelsPerPage);
+  const totalPages = Math.ceil(3200 / levelsPerPage);
 
   return (
     <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
@@ -125,7 +125,7 @@ export default function LevelsPage() {
               <div className="text-2xl">🎯</div>
               <div>
                 <div className="text-xs text-gray-400">{language === 'ar' ? 'المستوى' : 'Level'}</div>
-                <div className="text-lg font-bold text-white">{stats.currentLevel}/3000</div>
+                <div className="text-lg font-bold text-white">{stats.currentLevel}/3200</div>
               </div>
             </div>
           </div>
@@ -166,7 +166,7 @@ export default function LevelsPage() {
               />
             </div>
             <p className="text-center text-gray-400 mt-2 text-sm">
-              {stats.levelsCompleted} / 3000 {language === 'ar' ? 'مستويات مكتملة' : 'levels completed'}
+              {stats.levelsCompleted} / 3200 {language === 'ar' ? 'مستويات مكتملة' : 'levels completed'}
             </p>
           </div>
         </div>

@@ -29,7 +29,7 @@ function PlayContent() {
     attempts: {} as Record<number, number>,
     completedLevels: [] as number[],
     lastPlayedAt: new Date(),
-    totalEmbeddedLevels: 3000,
+    totalEmbeddedLevels: 3200,
     progressPercentage: 0,
     averageAttempts: 0,
   });
@@ -216,7 +216,7 @@ function PlayContent() {
               <div className="text-2xl">🎯</div>
               <div>
                 <div className="text-xs text-gray-400">{language === 'ar' ? 'المستوى' : 'Level'}</div>
-                <div className="text-lg font-bold text-white">{stats.currentLevel}/3000</div>
+                <div className="text-lg font-bold text-white">{stats.currentLevel}/3200</div>
               </div>
             </div>
           </div>
