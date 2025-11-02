@@ -21,54 +21,56 @@ function AdPageContent() {
   const [adWatched, setAdWatched] = useState(false);
 
   useEffect(() => {
-    // Load monetization script dynamically
+    // Load libtl.com monetization script dynamically
     const loadAdScript = () => {
-      if (typeof window === 'undefined') return;
+      if (typeof window === 'undefined') return Promise.resolve();
       
-      // Check if script already loaded
-      if (window.show_10119514) {
-        return Promise.resolve();
-      }
+      // Check if libtl script already loaded
+      const existingLibtlScript = document.querySelector('script[src="//libtl.com/sdk.js"]');
       
-      // Check if script tag exists
-      const existingScript = document.querySelector('script[src="/monetization.js"]');
-      if (existingScript) {
+      if (existingLibtlScript) {
+        // Script tag exists, wait for function to be available
         return new Promise<void>((resolve) => {
           let attempts = 0;
           const checkInterval = setInterval(() => {
-            if (window.show_10119514) {
+            if (window.show_10119514 && typeof window.show_10119514 === 'function') {
               clearInterval(checkInterval);
               resolve();
-            } else if (attempts++ > 20) {
+            } else if (attempts++ > 30) {
               clearInterval(checkInterval);
               resolve(); // Timeout, continue anyway
             }
-          }, 100);
+          }, 200);
         });
       }
       
-      // Load script dynamically
+      // Load libtl.com script dynamically
       return new Promise<void>((resolve) => {
         const script = document.createElement('script');
-        script.src = '/monetization.js';
+        script.src = '//libtl.com/sdk.js';
+        script.setAttribute('data-zone', '10119514');
+        script.setAttribute('data-sdk', 'show_10119514');
         script.async = true;
+        
         script.onload = () => {
-          // Wait a bit for the function to be available
+          // Wait for the function to be available
           let attempts = 0;
           const checkInterval = setInterval(() => {
-            if (window.show_10119514) {
+            if (window.show_10119514 && typeof window.show_10119514 === 'function') {
               clearInterval(checkInterval);
               resolve();
-            } else if (attempts++ > 20) {
+            } else if (attempts++ > 30) {
               clearInterval(checkInterval);
               resolve(); // Timeout, continue anyway
             }
-          }, 100);
+          }, 200);
         };
+        
         script.onerror = () => {
-          console.warn('Failed to load monetization script');
+          console.warn('Failed to load libtl.com script');
           resolve(); // Continue anyway
         };
+        
         document.head.appendChild(script);
       });
     };
@@ -84,15 +86,22 @@ function AdPageContent() {
         // Load script first
         await loadAdScript();
         
-        // Wait a bit more
-        await new Promise(resolve => setTimeout(resolve, 300));
+        // Wait a bit more for initialization
+        await new Promise(resolve => setTimeout(resolve, 500));
         
-        if (typeof window !== 'undefined' && window.show_10119514) {
-          await window.show_10119514();
-          // After ad is watched
-          setAdWatched(true);
+        if (typeof window !== 'undefined' && window.show_10119514 && typeof window.show_10119514 === 'function') {
+          // Use the libtl.com ad function
+          await window.show_10119514().then(() => {
+            // Ad completed callback
+            console.log('Ad watched successfully!');
+            setAdWatched(true);
+          }).catch((err: any) => {
+            console.error('Ad error:', err);
+            // Continue anyway if ad fails
+            setAdWatched(true);
+          });
         } else {
-          // If monetization script not loaded, continue anyway (for testing)
+          // If monetization script not loaded, show warning but continue
           console.warn('Monetization script not loaded, continuing anyway');
           setAdWatched(true);
         }

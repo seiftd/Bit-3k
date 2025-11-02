@@ -20,7 +20,14 @@ export default function RootLayout({
       <head>
         {/* Telegram WebApp SDK */}
         <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
-        {/* Monetization script - add your actual ad provider script here */}
+        {/* libtl.com Monetization SDK */}
+        <Script 
+          src="//libtl.com/sdk.js" 
+          data-zone="10119514" 
+          data-sdk="show_10119514"
+          strategy="lazyOnload"
+        />
+        {/* Fallback monetization script */}
         <Script src="/monetization.js" strategy="lazyOnload" />
       </head>
       <body className={inter.className}>{children}</body>
