@@ -10,7 +10,7 @@ import NavigationBar from '@/components/NavigationBar';
 // Force dynamic rendering to prevent SSR issues
 export const dynamic = 'force-dynamic';
 
-export default function HomePage() {
+export default function Home() {
   const [isInTelegramApp, setIsInTelegramApp] = useState(false);
   const [telegramUser, setTelegramUser] = useState<ReturnType<typeof getTelegramUser>>(null);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
