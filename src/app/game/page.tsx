@@ -126,6 +126,7 @@ function GameContent() {
           first_name: user.first_name,
           last_name: user.last_name,
           language_code: user.language_code || 'en',
+          referral_code: new URLSearchParams(window.location.search).get('start') || null,
         }),
       });
 

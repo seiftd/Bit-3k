@@ -65,6 +65,13 @@ export default function DashboardPage() {
       setReferralCode(getReferralCode());
       setReferralLink(getReferralLink());
       
+      // Check for referral code in URL and store it
+      const urlParams = new URLSearchParams(window.location.search);
+      const referralCodeParam = urlParams.get('start');
+      if (referralCodeParam) {
+        localStorage.setItem('referral_code', referralCodeParam);
+      }
+      
       // Set language from Telegram or localStorage
       const savedLang = getLanguage();
       setLanguageState(savedLang);
@@ -74,19 +81,73 @@ export default function DashboardPage() {
     loadStats();
   }, []);
 
-  const loadStats = () => {
+  const loadStats = async () => {
     if (typeof window === 'undefined') return;
     
     const currentStats = gameEngine.getStats();
     setStats(currentStats);
     
-    // TODO: Fetch real referrals from API when backend is ready
-    // For now, use game engine data
-    setReferrals({
-      total: 0, // Will be fetched from API
-      level1: 0,
-      level2: 0,
-    });
+    // Fetch real referrals from API
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://be-me.aizetecc.com/api';
+    const telegramWebApp = (window as any).Telegram?.WebApp;
+    const initData = telegramWebApp?.initData;
+    
+    if (telegramUser && initData) {
+      try {
+        // First authenticate to get token
+        const authResponse = await fetch(`${apiUrl}/auth/telegram`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Telegram-Init-Data': initData,
+          },
+          body: JSON.stringify({
+            telegram_id: telegramUser.id,
+            username: telegramUser.username,
+            first_name: telegramUser.first_name,
+            last_name: telegramUser.last_name,
+            language_code: telegramUser.language_code || 'en',
+            referral_code: new URLSearchParams(window.location.search).get('start') || null,
+          }),
+        });
+        
+        if (authResponse.ok) {
+          const authData = await authResponse.json();
+          const token = authData.access_token;
+          
+          // Fetch referral stats
+          try {
+            const referralResponse = await fetch(`${apiUrl}/users/me/referrals`, {
+              headers: {
+                'Authorization': `Bearer ${token}`,
+              },
+            });
+            
+            if (referralResponse.ok) {
+              const referralData = await referralResponse.json();
+              setReferrals({
+                total: referralData.total_referrals || 0,
+                level1: referralData.level1_referrals || 0,
+                level2: referralData.level2_referrals || 0,
+              });
+            }
+          } catch (err) {
+            console.error('Error fetching referrals:', err);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading stats:', error);
+      }
+    }
+    
+    // Fallback to 0 if API unavailable
+    if (referrals.total === 0 && referrals.level1 === 0 && referrals.level2 === 0) {
+      setReferrals({
+        total: 0,
+        level1: 0,
+        level2: 0,
+      });
+    }
   };
 
   const handleLanguageChange = (newLang: 'en' | 'ar') => {

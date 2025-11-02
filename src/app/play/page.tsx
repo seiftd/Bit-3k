@@ -114,19 +114,11 @@ function PlayContent() {
   };
 
   const handleWatchAd = () => {
-    // Open ad page
+    // Navigate to ad page within the app (not opening external window)
     if (typeof window !== 'undefined') {
-      const adUrl = `${window.location.origin}/ad?redirect=${encodeURIComponent(window.location.pathname)}`;
-      if (window.Telegram?.WebApp) {
-        window.Telegram.WebApp.openLink(adUrl);
-      } else {
-        window.open(adUrl, '_blank');
-      }
-      
-      // After ad, continue to next level
-      setTimeout(() => {
-        handleNext();
-      }, 2000);
+      const adUrl = `/ad?redirect=${encodeURIComponent(window.location.pathname)}&token=${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Use router navigation instead of openLink to stay within Mini App
+      window.location.href = adUrl;
     }
   };
 
