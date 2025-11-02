@@ -267,13 +267,21 @@ function GameContent() {
   }
 
   if (error && !level) {
+    // Auto-redirect to standalone game if error
+    useEffect(() => {
+      const timer = setTimeout(() => {
+        window.location.href = '/play';
+      }, 2000);
+      return () => clearTimeout(timer);
+    }, []);
+    
     return (
       <div className={`min-h-screen flex items-center justify-center bg-red-50 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
         <div className="text-center p-8">
           <div className="text-6xl mb-4">❌</div>
           <h1 className="text-2xl font-bold text-red-600 mb-2">{language === 'ar' ? 'خطأ' : 'Error'}</h1>
-          <p className="text-gray-600">{error}</p>
-          <p className="text-sm text-gray-500 mt-4">{language === 'ar' ? 'يرجى فتح البوت من التليجرام' : 'Please open from Telegram bot'}</p>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <p className="text-sm text-gray-500">{language === 'ar' ? 'جاري إعادة التوجيه إلى اللعبة...' : 'Redirecting to game...'}</p>
         </div>
       </div>
     );
