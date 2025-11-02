@@ -7,7 +7,10 @@ import { getLanguage, getLanguageDirection } from '@/lib/language';
 import FloatingIcons from '@/components/FloatingIcons';
 import NavigationBar from '@/components/NavigationBar';
 
-export default function Home() {
+// Force dynamic rendering to prevent SSR issues
+export const dynamic = 'force-dynamic';
+
+export default function HomePage() {
   const [isInTelegramApp, setIsInTelegramApp] = useState(false);
   const [telegramUser, setTelegramUser] = useState<ReturnType<typeof getTelegramUser>>(null);
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
