@@ -14,22 +14,42 @@ export default function Home() {
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true);
-    
-    if (typeof window !== 'undefined') {
-      initializeTelegramWebApp();
+    try {
+      setMounted(true);
       
-      const inTelegram = isInTelegram();
-      setIsInTelegramApp(inTelegram);
-      
-      if (inTelegram) {
-        const user = getTelegramUser();
-        setTelegramUser(user);
+      if (typeof window !== 'undefined') {
+        try {
+          initializeTelegramWebApp();
+        } catch (err) {
+          console.error('Error initializing Telegram WebApp:', err);
+        }
+        
+        try {
+          const inTelegram = isInTelegram();
+          setIsInTelegramApp(inTelegram);
+          
+          if (inTelegram) {
+            const user = getTelegramUser();
+            setTelegramUser(user);
+          }
+        } catch (err) {
+          console.error('Error checking Telegram:', err);
+          setIsInTelegramApp(false);
+        }
+        
+        // Set language
+        try {
+          const savedLang = getLanguage();
+          setLanguage(savedLang);
+        } catch (err) {
+          console.error('Error loading language:', err);
+          setLanguage('en');
+        }
       }
-      
-      // Set language
-      const savedLang = getLanguage();
-      setLanguage(savedLang);
+    } catch (err) {
+      console.error('Error in Home useEffect:', err);
+      setMounted(true);
+      setLanguage('en');
     }
   }, []);
 
@@ -80,9 +100,10 @@ export default function Home() {
 
   // If not in Telegram, show welcome message with instructions
   if (!isInTelegramApp) {
+    const dir = typeof window !== 'undefined' ? getLanguageDirection(language) : 'ltr';
     return (
-      <div className={`min-h-screen bg-gray-900 relative ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
-        <FloatingIcons />
+      <div className={`min-h-screen bg-gray-900 relative ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={dir}>
+        {mounted && <FloatingIcons />}
         
         <div className="flex items-center justify-center min-h-screen p-4">
           <div className="bg-gray-800 rounded-2xl shadow-2xl p-8 max-w-md w-full border border-gray-700">
@@ -114,10 +135,11 @@ export default function Home() {
 
   // Welcome page for Telegram users
   const userName = telegramUser?.first_name || telegramUser?.username || 'Player';
+  const dir = typeof window !== 'undefined' ? getLanguageDirection(language) : 'ltr';
 
   return (
-    <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={getLanguageDirection(language)}>
-      <FloatingIcons />
+    <div className={`min-h-screen bg-gray-900 relative pb-20 ${language === 'ar' ? 'rtl' : 'ltr'}`} dir={dir}>
+      {mounted && <FloatingIcons />}
       
       {/* Stats Bar */}
       <div className="p-4 bg-gray-800 border-b border-gray-700">
@@ -217,7 +239,7 @@ export default function Home() {
         </div>
       </div>
 
-      <NavigationBar />
+      {mounted && <NavigationBar language={language} />}
     </div>
   );
 }
