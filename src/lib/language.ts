@@ -33,3 +33,4 @@ export function getLanguageDirection(language: Language): 'ltr' | 'rtl' {
   return language === 'ar' ? 'rtl' : 'ltr';
 }
 
+

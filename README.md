@@ -72,6 +72,17 @@ Update `public/monetization.js` with your actual monetization provider's code.
 - ✅ Responsive design
 - ✅ Multilingual support (EN/AR)
 
+### Mini‑Games
+- ✅ New: Zombie Rush (`/zombie-game`) built with Phaser 3
+  - Client-only Phaser bundle (Next.js dynamic import)
+  - Calls backend:
+    - `GET /api/game/zombie/config`
+    - `GET /api/game/zombie/stats` (JWT)
+    - `POST /api/game/zombie/score` (JWT)
+  - Env:
+    - Frontend: `NEXT_PUBLIC_API_URL`
+    - Backend: `ZOMBIE_GAME_FREE_PLAYS`, `ZOMBIE_GAME_MAX_DAILY_REWARD`
+
 ## 🎮 Game Modes
 
 1. **Standalone Mode** (`/play`) - Play 25 embedded levels without API

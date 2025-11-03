@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate Game Assets</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #222; color: #fff; }
+        canvas { border: 1px solid #555; margin: 10px; background: #fff; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        .container { display: flex; flex-wrap: wrap; }
+    </style>
+</head>
+<body>
+    <h1>Generate Zombie Game Assets</h1>
+    <div class="container">
+        <div>
+            <h3>Player Sprite</h3>
+            <canvas id="playerCanvas" width="64" height="64"></canvas>
+            <br>
+            <button onclick="downloadCanvas('playerCanvas', 'player.png')">Download Player</button>
+        </div>
+        <div>
+            <h3>Zombie Sprite</h3>
+            <canvas id="zombieCanvas" width="64" height="64"></canvas>
+            <br>
+            <button onclick="downloadCanvas('zombieCanvas', 'zombie.png')">Download Zombie</button>
+        </div>
+        <div>
+            <h3>Bullet Sprite</h3>
+            <canvas id="bulletCanvas" width="32" height="32"></canvas>
+            <br>
+            <button onclick="downloadCanvas('bulletCanvas', 'bullet.png')">Download Bullet</button>
+        </div>
+        <div>
+            <h3>Background</h3>
+            <canvas id="bgCanvas" width="800" height="600"></canvas>
+            <br>
+            <button onclick="downloadCanvas('bgCanvas', 'bg.png')">Download Background</button>
+        </div>
+    </div>
+
+    <script>
+        // Player
+        const playerCanvas = document.getElementById('playerCanvas');
+        const playerCtx = playerCanvas.getContext('2d');
+        playerCtx.fillStyle = '#4A90E2';
+        playerCtx.fillRect(10, 10, 44, 44);
+        playerCtx.strokeStyle = '#2C5AA0';
+        playerCtx.lineWidth = 3;
+        playerCtx.strokeRect(10, 10, 44, 44);
+        playerCtx.fillStyle = '#FFFFFF';
+        playerCtx.fillRect(20, 25, 8, 8);
+        playerCtx.fillRect(36, 25, 8, 8);
+        playerCtx.fillRect(24, 40, 16, 4);
+
+        // Zombie
+        const zombieCanvas = document.getElementById('zombieCanvas');
+        const zombieCtx = zombieCanvas.getContext('2d');
+        zombieCtx.fillStyle = '#6B8E23';
+        zombieCtx.fillRect(10, 10, 44, 44);
+        zombieCtx.strokeStyle = '#4A5F1A';
+        zombieCtx.lineWidth = 3;
+        zombieCtx.strokeRect(10, 10, 44, 44);
+        zombieCtx.fillStyle = '#FF0000';
+        zombieCtx.fillRect(18, 25, 8, 8);
+        zombieCtx.fillRect(38, 25, 8, 8);
+        zombieCtx.fillStyle = '#8B0000';
+        zombieCtx.fillRect(22, 38, 20, 8);
+        zombieCtx.fillStyle = '#FFFFFF';
+        for (let i = 0; i < 4; i++) {
+            zombieCtx.fillRect(24 + i * 5, 38, 3, 8);
+        }
+
+        // Bullet
+        const bulletCanvas = document.getElementById('bulletCanvas');
+        const bulletCtx = bulletCanvas.getContext('2d');
+        bulletCtx.fillStyle = '#FFD700';
+        bulletCtx.beginPath();
+        bulletCtx.arc(16, 16, 12, 0, Math.PI * 2);
+        bulletCtx.fill();
+        bulletCtx.strokeStyle = '#FFA500';
+        bulletCtx.lineWidth = 2;
+        bulletCtx.stroke();
+        bulletCtx.fillStyle = '#FFFF99';
+        bulletCtx.beginPath();
+        bulletCtx.arc(12, 12, 4, 0, Math.PI * 2);
+        bulletCtx.fill();
+
+        // Background
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        bgCtx.fillStyle = '#1a1a1a';
+        bgCtx.fillRect(0, 0, 800, 600);
+        for (let i = 0; i < 5000; i++) {
+            const x = Math.random() * 800;
+            const y = Math.random() * 600;
+            const gray = Math.random() * 30;
+            bgCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
+            bgCtx.fillRect(x, y, 2, 2);
+        }
+        bgCtx.fillStyle = 'rgba(139, 0, 0, 0.3)';
+        for (let i = 0; i < 10; i++) {
+            const x = Math.random() * 800;
+            const y = Math.random() * 600;
+            bgCtx.beginPath();
+            bgCtx.arc(x, y, Math.random() * 30 + 10, 0, Math.PI * 2);
+            bgCtx.fill();
+        }
+
+        function downloadCanvas(canvasId, filename) {
+            const canvas = document.getElementById(canvasId);
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Auto-download all on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                downloadCanvas('playerCanvas', 'player.png');
+                setTimeout(() => downloadCanvas('zombieCanvas', 'zombie.png'), 500);
+                setTimeout(() => downloadCanvas('bulletCanvas', 'bullet.png'), 1000);
+                setTimeout(() => downloadCanvas('bgCanvas', 'bg.png'), 1500);
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
+

@@ -673,6 +673,9 @@ export default function DashboardPage() {
                 <Link href="/levels" className="block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-xl transition text-center">
                   📋 {language === 'ar' ? 'المستويات' : 'Levels'}
                 </Link>
+                <Link href="/zombie-game" className="block w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-4 rounded-xl transition text-center">
+                  🧟 Zombie Rush
+                </Link>
               </div>
             </div>
           </div>
