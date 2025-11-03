@@ -50,25 +50,18 @@ function PlayContent() {
     // Check if ad was completed (coming back from ad page)
     const adCompleted = searchParams?.get('adCompleted');
     if (adCompleted === 'true') {
-      // Ad was watched, move to next level immediately
-      const nextLevel = engine.nextLevel();
-      if (nextLevel) {
-        // Ensure options are present
-        const levelWithOptions = nextLevel.options && nextLevel.options.length > 0 
-          ? nextLevel 
-          : engine.getCurrentLevel();
-        
-        if (levelWithOptions) {
-          setLevel(levelWithOptions);
-          setSelectedAnswer(null);
-          setResult(null);
-          setShowHint(false);
-          setStats(engine.getStats());
-          setLoading(false);
-          // Clear the URL parameter to avoid repeating on refresh
-          window.history.replaceState({}, '', window.location.pathname);
-          return;
-        }
+      // Grant reward and advance after ad
+      const advanced = engine.completeAdAndAdvance();
+      const levelWithOptions = advanced || engine.getCurrentLevel();
+      if (levelWithOptions) {
+        setLevel(levelWithOptions);
+        setSelectedAnswer(null);
+        setResult(null);
+        setShowHint(false);
+        setStats(engine.getStats());
+        setLoading(false);
+        window.history.replaceState({}, '', window.location.pathname);
+        return;
       }
     }
 

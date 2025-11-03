@@ -14,6 +14,8 @@ export interface GameState {
   attempts: Record<number, number>;
   completedLevels: number[];
   lastPlayedAt: Date;
+  // Reward pending until user watches the ad
+  pendingAd?: { level: number; sbrEarned: number } | null;
 }
 
 export const DEFAULT_GAME_STATE: GameState = {
@@ -25,6 +27,7 @@ export const DEFAULT_GAME_STATE: GameState = {
   attempts: {},
   completedLevels: [],
   lastPlayedAt: new Date(),
+  pendingAd: null,
 };
 
 export class GameEngine {
@@ -249,28 +252,26 @@ export class GameEngine {
     this.state.attempts[level.level_number] = (this.state.attempts[level.level_number] || 0) + 1;
 
     if (isCorrect) {
-      // Award SBR
-      const sbrEarned = level.sbr_reward;
-      this.state.sbrBalance += sbrEarned;
-      this.state.totalEarned += sbrEarned;
-      
-      // Track completion
-      if (!this.state.completedLevels.includes(level.level_number)) {
-        this.state.completedLevels.push(level.level_number);
-        this.state.levelsCompleted += 1;
+      // If already awaiting ad for this level, do not re-award
+      if (this.state.pendingAd && this.state.pendingAd.level === level.level_number) {
+        return {
+          correct: true,
+          message: '🎉 Correct! Watch the ad to claim your reward.',
+          sbrEarned: this.state.pendingAd.sbrEarned,
+          needsAd: true,
+        };
       }
 
-      // Determine if ad is needed
-      // Show ad every 3 levels
-      const needsAd = level.level_number % 3 === 0 && level.level_number > 0;
-
+      // Set pending reward; actual reward will be granted after ad
+      const sbrEarned = level.sbr_reward;
+      this.state.pendingAd = { level: level.level_number, sbrEarned };
       this.saveState();
 
       return {
         correct: true,
-        message: '🎉 Correct! Well done!',
+        message: '🎉 Correct! Watch the ad to claim your reward.',
         sbrEarned,
-        needsAd,
+        needsAd: true,
       };
     } else {
       this.saveState();
@@ -342,6 +343,43 @@ export class GameEngine {
   watchAd(): void {
     this.state.totalAdsWatched += 1;
     this.saveState();
+  }
+
+  // Grant pending reward and advance to the next level after ad
+  completeAdAndAdvance(): GameLevel | null {
+    const current = this.getCurrentLevel();
+    const pending = this.state.pendingAd;
+    if (!pending) {
+      return current;
+    }
+
+    // If pending belongs to the current level (normal flow)
+    if (current && pending.level === current.level_number) {
+      this.state.sbrBalance += pending.sbrEarned;
+      this.state.totalEarned += pending.sbrEarned;
+      if (!this.state.completedLevels.includes(current.level_number)) {
+        this.state.completedLevels.push(current.level_number);
+        this.state.levelsCompleted += 1;
+      }
+      this.state.pendingAd = null;
+      this.saveState();
+      return this.nextLevel();
+    }
+
+    // If user refreshed and currentLevel already incremented, still clear pending
+    if (pending.level === this.state.currentLevel - 1) {
+      this.state.sbrBalance += pending.sbrEarned;
+      this.state.totalEarned += pending.sbrEarned;
+      if (!this.state.completedLevels.includes(pending.level)) {
+        this.state.completedLevels.push(pending.level);
+        this.state.levelsCompleted += 1;
+      }
+      this.state.pendingAd = null;
+      this.saveState();
+      return this.getCurrentLevel();
+    }
+
+    return current;
   }
 
   // Reset game progress
