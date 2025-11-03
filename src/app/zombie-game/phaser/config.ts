@@ -23,7 +23,7 @@ export function createGameConfig(Phaser: any, parentEl: HTMLElement, meta: { use
     },
     physics: {
       default: 'arcade',
-      arcade: { gravity: { y: 0 }, debug: false },
+      arcade: { gravity: { x: 0, y: 0 }, debug: false },
     },
     scene: [PreloadScene, MenuScene, GameScene, GameOverScene],
     callbacks: {
