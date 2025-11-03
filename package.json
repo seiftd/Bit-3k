@@ -17,12 +17,14 @@
     "@tanstack/react-query": "^5.17.19",
     "zustand": "^4.5.0",
     "clsx": "^2.1.0",
-    "lucide-react": "^0.309.0"
+    "lucide-react": "^0.309.0",
+    "phaser": "^3.80.1"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "@types/phaser": "^3.70.0",
     "typescript": "^5",
     "autoprefixer": "^10.0.1",
     "postcss": "^8",
